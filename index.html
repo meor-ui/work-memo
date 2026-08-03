@@ -1,1 +1,908 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>工作備忘錄</title>
+<meta name="theme-color" content="#0d1720" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icon-192.png" />
+<style>
+  :root{
+    --ink:#0d1720;--panel:#152532;--panel-2:#1c3040;--line:#284256;
+    --coolant:#3fc8dd;--amber:#ffa14a;--red:#ff6b6b;--green:#5ed6a0;
+    --paper:#e7eff4;--muted:#8aa4b6;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--ink);color:var(--paper);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  body{padding:max(10px,env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom))}
+  #app{max-width:680px;margin:0 auto}
+  button{font-family:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--coolant);outline-offset:2px}
 
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;
+       padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:12px;
+       position:sticky;top:0;background:var(--ink);z-index:5}
+  .brand{display:flex;align-items:center;gap:8px;min-width:0}
+  .brand h1{font-size:16px;margin:0;font-weight:600;white-space:nowrap}
+  .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+       color:var(--ink);background:var(--coolant);padding:3px 6px;border-radius:3px}
+  .right{display:flex;align-items:center;gap:10px}
+  .readout{display:flex;gap:12px;font-family:var(--mono)}
+  .readout div{text-align:right;line-height:1.1}
+  .readout b{display:block;font-size:16px;font-weight:600}
+  .readout b.hot{color:var(--red)}
+  .readout span{font-size:10px;color:var(--muted)}
+  .gear{background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;width:38px;height:38px;font-size:15px;flex:none}
+  .syncline{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);
+    font-family:var(--mono);margin:-6px 0 12px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+  .dot.ok{background:var(--green)} .dot.busy{background:var(--amber)}
+  .dot.err{background:var(--red)} .dot.off{background:var(--line)}
+  .syncline button{margin-left:auto;background:transparent;border:1px solid var(--line);
+    color:var(--muted);border-radius:6px;padding:5px 9px;font-size:11px}
+
+  .banner{display:none;align-items:center;gap:10px;background:var(--panel-2);
+    border:1px solid var(--amber);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px}
+  .banner.on{display:flex}
+  .banner b{color:var(--amber);font-weight:600;flex:none}
+  .banner button{margin-left:auto;background:var(--amber);border:0;color:var(--ink);
+    border-radius:6px;padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+
+  .composer{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+  .composer textarea{width:100%;background:transparent;border:0;resize:none;color:var(--paper);
+       font-size:16px;line-height:1.55;padding:4px 2px;min-height:30px;font-family:inherit}
+  .composer textarea::placeholder{color:var(--muted)}
+  .sites{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
+  .chip{border:1px solid var(--line);background:transparent;color:var(--muted);
+        border-radius:999px;padding:7px 12px;font-size:13px}
+  .chip.on{color:var(--ink);font-weight:600}
+  .composer-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .cf-left{display:flex;gap:6px;flex-wrap:wrap}
+  .primary{background:var(--coolant);color:var(--ink);border:0;border-radius:8px;
+           padding:11px 18px;font-size:15px;font-weight:600;min-height:46px}
+  .ghost{background:transparent;border:1px solid var(--line);color:var(--muted);
+         border-radius:8px;padding:10px 12px;font-size:13px;min-height:44px}
+  .ghost.set{color:var(--amber);border-color:var(--amber)}
+  .duebox{display:none;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
+  .duebox.on{display:flex}
+  .duebox input{background:var(--ink);border:1px solid var(--line);border-radius:8px;
+    color:var(--paper);padding:10px;font-size:15px;font-family:inherit;min-height:44px;
+    color-scheme:dark;flex:1 1 190px}
+  .duebox .quick{display:flex;gap:6px;flex-wrap:wrap}
+  .duebox .quick button{border:1px solid var(--line);background:transparent;color:var(--muted);
+    border-radius:999px;padding:8px 11px;font-size:12.5px}
+  .queue{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .queue figure{position:relative;margin:0}
+  .queue img{width:62px;height:62px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+  .queue button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;
+    background:var(--ink);border:1px solid var(--line);color:var(--paper);font-size:12px;line-height:1;padding:0}
+
+  .filters{display:flex;gap:8px;margin:12px 0 10px;align-items:center;flex-wrap:wrap}
+  .filters input{flex:1 1 100%;min-width:0;background:var(--panel);border:1px solid var(--line);
+       border-radius:8px;color:var(--paper);padding:11px 12px;font-size:16px;font-family:inherit;min-height:46px}
+  .segmented{display:flex;width:100%;background:var(--panel);border:1px solid var(--line);
+       border-radius:8px;overflow:hidden}
+  .segmented button{flex:1;min-width:0;background:transparent;border:0;color:var(--muted);
+       padding:12px 6px;font-size:13px;white-space:nowrap}
+  .segmented button.on{background:var(--panel-2);color:var(--paper);font-weight:600}
+
+  .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .card{display:flex;gap:10px;background:var(--panel);border:1px solid var(--line);
+        border-left:4px solid var(--c,var(--coolant));border-radius:8px;padding:12px}
+  .card.done{opacity:.5}
+  .card.done .text{text-decoration:line-through}
+  .card.late{border-color:var(--red)}
+  .check{flex:none;width:26px;height:26px;margin-top:1px;border-radius:6px;
+         border:1.5px solid var(--line);background:transparent;color:var(--ink);
+         font-size:14px;display:flex;align-items:center;justify-content:center}
+  .card.done .check{background:var(--coolant);border-color:var(--coolant)}
+  .body{flex:1;min-width:0}
+  .text{font-size:15.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+  .meta{display:flex;align-items:center;gap:8px;margin-top:7px;font-family:var(--mono);
+        font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .meta .site{color:var(--c,var(--coolant))}
+  .who{color:var(--muted)}
+  .pend{color:var(--amber)}
+  .due{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11px;
+       background:transparent;color:var(--muted)}
+  .due.soon{color:var(--amber);border-color:var(--amber)}
+  .due.late{color:var(--red);border-color:var(--red)}
+  .clip{background:var(--panel-2);border:1px solid var(--line);color:var(--paper);
+        border-radius:999px;padding:4px 10px;font-size:11px;font-family:var(--mono)}
+  .acts{display:flex;gap:2px;margin-left:auto}
+  .acts button{background:transparent;border:0;color:var(--muted);font-size:12.5px;padding:6px 7px;border-radius:5px}
+  .star{flex:none;background:transparent;border:0;color:var(--line);font-size:17px;padding:0 4px;align-self:flex-start}
+  .star.on{color:var(--amber)}
+  .shelf{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+  .shelf img{width:76px;height:76px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+  .shelf .addph{width:76px;height:76px;border-radius:6px;border:1px dashed var(--line);
+     background:transparent;color:var(--muted);font-size:12px}
+  .shelf .loading{width:76px;height:76px;border-radius:6px;border:1px solid var(--line);
+     display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px}
+  .edit{width:100%;background:var(--ink);border:1px solid var(--coolant);border-radius:6px;
+        color:var(--paper);font-size:16px;line-height:1.6;padding:8px;resize:vertical;font-family:inherit}
+  .editdue{background:var(--ink);border:1px solid var(--line);border-radius:6px;color:var(--paper);
+        padding:9px;font-size:14px;font-family:inherit;color-scheme:dark;margin-top:8px;width:100%}
+
+  .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:26px 10px;margin:0}
+  .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+  .foot button{flex:1 1 46%}
+  .hint{font-size:11px;color:var(--muted);text-align:center;margin:12px 0 2px;line-height:1.7}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));
+     background:var(--panel-2);border:1px solid var(--coolant);color:var(--paper);
+     padding:10px 16px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;z-index:60}
+  .toast.on{opacity:1}
+  .viewer{position:fixed;inset:0;background:rgba(6,12,17,.96);display:none;flex-direction:column;z-index:40}
+  .viewer.on{display:flex}
+  .viewer img{flex:1;min-height:0;object-fit:contain;width:100%}
+  .viewer .vbar{display:flex;gap:8px;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .viewer .vbar button{flex:1}
+
+  .sheet{position:fixed;inset:0;background:rgba(6,12,17,.9);display:none;z-index:50;
+     overflow:auto;padding:24px 14px calc(24px + env(safe-area-inset-bottom))}
+  .sheet.on{display:block}
+  .sheetbox{max-width:520px;margin:0 auto;background:var(--panel);border:1px solid var(--line);
+     border-radius:12px;padding:16px}
+  .sheetbox h2{font-size:16px;margin:0 0 4px}
+  .sheetbox p{font-size:12.5px;color:var(--muted);line-height:1.7;margin:0 0 14px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+  .field input{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:8px;
+     color:var(--paper);padding:11px;font-size:15px;font-family:inherit;min-height:46px}
+  .field small{display:block;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
+  .sheetfoot{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .sheetfoot button{flex:1 1 46%}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="bar">
+    <div class="brand"><span class="tag">MEMO</span><h1>工作備忘錄</h1></div>
+    <div class="right">
+      <div class="readout">
+        <div><b id="statLate">0</b><span>逾期</span></div>
+        <div><b id="statOpen">0</b><span>待辦</span></div>
+        <div><b id="statDone">0</b><span>完成</span></div>
+      </div>
+      <button class="gear" id="gearBtn" type="button" aria-label="設定">⚙</button>
+    </div>
+  </header>
+
+  <div class="syncline">
+    <span class="dot off" id="dot"></span><span id="syncText">尚未設定共用</span>
+    <button id="syncNow" type="button">立即同步</button>
+  </div>
+
+  <div class="banner" id="banner"><b id="bannerTag">提醒</b><span id="bannerText"></span><button id="bannerBtn" type="button">立即備份</button></div>
+
+  <section class="composer">
+    <textarea id="input" rows="1" placeholder="記一件事…"></textarea>
+    <div class="queue" id="queue"></div>
+    <div class="duebox" id="duebox">
+      <input type="datetime-local" id="dueInput" />
+      <div class="quick">
+        <button type="button" data-q="today18">今天 18:00</button>
+        <button type="button" data-q="tmr9">明天 09:00</button>
+        <button type="button" data-q="week">下週一 09:00</button>
+        <button type="button" data-q="clear">清除</button>
+      </div>
+    </div>
+    <div class="sites" id="siteChips"></div>
+    <div class="composer-foot">
+      <div class="cf-left">
+        <button class="ghost" id="picBtn" type="button">🖼 相簿</button>
+        <button class="ghost" id="dueBtn" type="button">⏰ 到期</button>
+        <button class="ghost" id="addSiteBtn" type="button">＋站點</button>
+      </div>
+      <button class="primary" id="addBtn" type="button">建立</button>
+    </div>
+  </section>
+
+  <section class="filters">
+    <input id="search" type="search" placeholder="搜尋內容、站點或人名" />
+    <div class="segmented" id="statusFilter">
+      <button class="on" data-status="open" type="button">待辦</button>
+      <button data-status="due" type="button">有期限</button>
+      <button data-status="mine" type="button">我的</button>
+      <button data-status="done" type="button">完成</button>
+      <button data-status="all" type="button">全部</button>
+    </div>
+  </section>
+
+  <ul id="list" class="list"></ul>
+  <p id="empty" class="empty"></p>
+
+  <footer class="foot">
+    <button class="ghost" id="copyBtn" type="button">複製待辦清單</button>
+    <button class="ghost" id="exportBtn" type="button">備份（含照片）</button>
+    <button class="ghost" id="importBtn" type="button">還原備份</button>
+    <button class="ghost" id="clearBtn" type="button">清除已完成</button>
+  </footer>
+  <input type="file" id="fileJson" accept="application/json" hidden />
+  <input type="file" id="filePic" accept="image/*" multiple hidden />
+  <p class="hint" id="storageHint"></p>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="viewer" id="viewer">
+  <img id="viewerImg" alt="附件照片" />
+  <div class="vbar">
+    <button class="ghost" id="viewerDel" type="button">刪除這張</button>
+    <button class="primary" id="viewerClose" type="button">關閉</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="sheetbox">
+    <h2>設定</h2>
+    <p>填好之後，這台裝置就會和同事共用同一份備忘。沒填也能用，只是資料只留在本機。</p>
+    <div class="field">
+      <label for="cfgUser">你的名字</label>
+      <input id="cfgUser" placeholder="例如：Ian" />
+      <small>會標在你建立或修改的每一則備忘上，讓同事知道是誰寫的。</small>
+    </div>
+    <div class="field">
+      <label for="cfgUrl">Supabase 專案網址</label>
+      <input id="cfgUrl" placeholder="https://xxxxx.supabase.co" inputmode="url" />
+    </div>
+    <div class="field">
+      <label for="cfgKey">Supabase anon key</label>
+      <input id="cfgKey" placeholder="eyJhbGciOi..." />
+      <small>在 Supabase 後台 Settings → API 取得。這把金鑰會出現在網頁原始碼裡，任何拿到網址的人都能讀寫，請只放非機密內容。</small>
+    </div>
+    <div class="sheetfoot">
+      <button class="primary" id="cfgSave" type="button">儲存並同步</button>
+      <button class="ghost" id="cfgLink" type="button">產生同事用連結</button>
+      <button class="ghost" id="cfgClose" type="button">關閉</button>
+      <button class="ghost" id="cfgClear" type="button">停用共用</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+/* ================= IndexedDB ================= */
+var DB=null;
+function openDB(){return new Promise(function(res,rej){
+  var r=indexedDB.open('workmemo',1);
+  r.onupgradeneeded=function(){
+    var db=r.result;
+    if(!db.objectStoreNames.contains('notes')) db.createObjectStore('notes',{keyPath:'id'});
+    if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
+    if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'k'});
+  };
+  r.onsuccess=function(){DB=r.result;res(DB)};
+  r.onerror=function(){rej(r.error)};
+})}
+function stx(s,m){return DB.transaction(s,m).objectStore(s)}
+function req(r){return new Promise(function(res,rej){
+  r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}})}
+function putNote(n){return req(stx('notes','readwrite').put(n))}
+function delNoteDB(id){return req(stx('notes','readwrite').delete(id))}
+function allNotes(){return req(stx('notes').getAll())}
+function putPhoto(p){return req(stx('photos','readwrite').put(p))}
+function getPhoto(id){return req(stx('photos').get(id))}
+function delPhoto(id){return req(stx('photos','readwrite').delete(id))}
+function allPhotos(){return req(stx('photos').getAll())}
+function putMeta(k,v){return req(stx('meta','readwrite').put({k:k,v:v}))}
+function getMeta(k){return req(stx('meta').get(k)).then(function(r){return r?r.v:null})}
+
+/* ================= 狀態 ================= */
+var PALETTE=['#3fc8dd','#ffa14a','#a78bfa','#5ed6a0','#ff7f9e','#7ab7ff'];
+var DEFAULT_SITES=['英業達桃園','英業達大溪','智邦竹北','辦公室','其他'];
+var BUCKET='memo-photos';
+var notes=[],sites=DEFAULT_SITES.slice(),pick=DEFAULT_SITES[0];
+var filter='open',q='',opened={},queue=[],urls={},attachTo=null;
+var cfg={url:'',key:'',user:''},lastPull='1970-01-01T00:00:00Z';
+var lastBackup=0,changes=0,syncing=false,syncTimer=null;
+var $=function(id){return document.getElementById(id)};
+var list=$('list'),empty=$('empty'),input=$('input');
+
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2200)}
+function color(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%997;
+  return PALETTE[h%PALETTE.length]}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function p2(x){return x<10?'0'+x:''+x}
+function when(t){var d=new Date(t),n=new Date();
+  return (d.toDateString()===n.toDateString()?'今天':(d.getMonth()+1)+'/'+d.getDate())
+    +' '+p2(d.getHours())+':'+p2(d.getMinutes())}
+function dueLabel(t){var d=new Date(t),n=new Date();
+  var dd=Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate())-
+        new Date(n.getFullYear(),n.getMonth(),n.getDate()))/864e5);
+  var day=dd===0?'今天':dd===1?'明天':dd===-1?'昨天':(d.getMonth()+1)+'/'+d.getDate();
+  return '⏰ '+day+' '+p2(d.getHours())+':'+p2(d.getMinutes());
+}
+function toLocalInput(t){var d=new Date(t);
+  return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes())}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,9)}
+function me(){return cfg.user||'未具名'}
+function online(){return cfg.url&&cfg.key}
+
+/* ================= Supabase REST ================= */
+function api(path,opts){
+  opts=opts||{};
+  var h=Object.assign({apikey:cfg.key,Authorization:'Bearer '+cfg.key},opts.headers||{});
+  return fetch(cfg.url.replace(/\/+$/,'')+path,Object.assign({},opts,{headers:h}));
+}
+function toRow(n){
+  return {id:n.id,text:n.text,site:n.site,done:!!n.done,star:!!n.star,
+    due:n.due?new Date(n.due).toISOString():null,
+    created_at:new Date(n.created).toISOString(),
+    updated_at:new Date(n.updated||n.created).toISOString(),
+    deleted:!!n.deleted,created_by:n.created_by||'',updated_by:n.updated_by||'',
+    photos:n.photos||[]};
+}
+function fromRow(r){
+  return {id:r.id,text:r.text||'',site:r.site||'其他',done:!!r.done,star:!!r.star,
+    due:r.due?new Date(r.due).getTime():null,
+    created:new Date(r.created_at).getTime(),
+    updated:new Date(r.updated_at).getTime(),
+    deleted:!!r.deleted,created_by:r.created_by||'',updated_by:r.updated_by||'',
+    photos:r.photos||[],dirty:false};
+}
+function setSync(cls,text){
+  $('dot').className='dot '+cls; $('syncText').textContent=text;
+}
+async function push(){
+  var dirty=notes.filter(function(n){return n.dirty});
+  if(!dirty.length) return 0;
+  var res=await api('/rest/v1/notes',{method:'POST',
+    headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify(dirty.map(toRow))});
+  if(!res.ok) throw new Error('上傳失敗 '+res.status+' '+(await res.text()).slice(0,120));
+  for(var i=0;i<dirty.length;i++){dirty[i].dirty=false;await putNote(dirty[i])}
+  return dirty.length;
+}
+async function pull(){
+  var res=await api('/rest/v1/notes?select=*&updated_at=gt.'+encodeURIComponent(lastPull)
+    +'&order=updated_at.asc&limit=500');
+  if(!res.ok) throw new Error('下載失敗 '+res.status+' '+(await res.text()).slice(0,120));
+  var rows=await res.json(),n=0;
+  for(var i=0;i<rows.length;i++){
+    var r=rows[i],inc=fromRow(r),cur=null;
+    for(var j=0;j<notes.length;j++) if(notes[j].id===inc.id){cur=notes[j];break}
+    if(cur&&cur.dirty&&cur.updated>=inc.updated) continue;      // 本機較新且尚未上傳 → 保留本機
+    if(cur&&cur.updated>inc.updated) continue;                   // 本機較新 → 保留
+    if(cur){ Object.assign(cur,inc) } else { notes.push(inc) }
+    await putNote(cur||inc); n++;
+    if(r.updated_at>lastPull) lastPull=r.updated_at;
+  }
+  if(rows.length) await putMeta('lastPull',lastPull);
+  return n;
+}
+async function pullSites(){
+  var res=await api('/rest/v1/sites?select=name&order=name.asc');
+  if(!res.ok) return;
+  var rows=await res.json();
+  if(!rows.length) return;
+  var names=rows.map(function(r){return r.name});
+  var changed=names.length!==sites.length||names.some(function(x,i){return x!==sites[i]});
+  if(changed){ sites=names; await putMeta('sites',sites);
+    if(sites.indexOf(pick)<0) pick=sites[0]; renderSites(); }
+}
+async function pushSite(name){
+  if(!online()) return;
+  try{ await api('/rest/v1/sites',{method:'POST',
+    headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify([{name:name}])}) }catch(e){}
+}
+async function sync(quiet){
+  if(!online()){ setSync('off','尚未設定共用（資料只存在本機）'); return }
+  if(syncing) return;
+  syncing=true; setSync('busy','同步中…');
+  try{
+    await push();
+    await pull();
+    await pullSites();
+    await uploadPending();
+    setSync('ok','已同步 · '+p2(new Date().getHours())+':'+p2(new Date().getMinutes())+' · '+me());
+    render();
+  }catch(e){
+    setSync('err','同步失敗：'+(e.message||'網路異常'));
+    if(!quiet) toast('同步失敗，稍後自動重試');
+  }finally{ syncing=false }
+}
+function scheduleSync(){
+  if(!online()) return;
+  clearTimeout(syncTimer); syncTimer=setTimeout(function(){sync(true)},1500);
+}
+
+/* ================= 照片（本機 + 雲端） ================= */
+function shrink(file,max,quality){
+  return new Promise(function(res,rej){
+    var img=new Image(),u=URL.createObjectURL(file);
+    img.onload=function(){
+      var w=img.width,h=img.height,r=Math.min(1,max/Math.max(w,h));
+      var c=document.createElement('canvas');
+      c.width=Math.round(w*r);c.height=Math.round(h*r);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(u);
+      c.toBlob(function(b){b?res(b):rej(new Error('壓縮失敗'))},'image/jpeg',quality);
+    };
+    img.onerror=function(){URL.revokeObjectURL(u);rej(new Error('讀不到圖片'))};
+    img.src=u;
+  });
+}
+async function intake(files){
+  for(var i=0;i<files.length;i++){
+    var f=files[i]; if(!f.type||f.type.indexOf('image/')!==0) continue;
+    try{
+      var full=await shrink(f,1600,.78),thumb=await shrink(f,320,.7);
+      queue.push({id:uid(),full:full,thumb:thumb,created:Date.now(),uploaded:false});
+    }catch(e){toast('有一張照片處理失敗')}
+  }
+  renderQueue();
+}
+function objURL(k,blob){if(!urls[k])urls[k]=URL.createObjectURL(blob);return urls[k]}
+function renderQueue(){
+  var box=$('queue');box.innerHTML='';
+  queue.forEach(function(p,i){
+    var fig=document.createElement('figure');
+    var im=document.createElement('img');im.src=objURL('q'+p.id,p.thumb);
+    var x=document.createElement('button');x.type='button';x.textContent='✕';
+    x.onclick=function(){queue.splice(i,1);renderQueue()};
+    fig.appendChild(im);fig.appendChild(x);box.appendChild(fig);
+  });
+}
+async function upload(p){
+  if(!online()||p.uploaded) return;
+  var pairs=[[p.id+'.jpg',p.full],[p.id+'_t.jpg',p.thumb]];
+  for(var i=0;i<pairs.length;i++){
+    var res=await api('/storage/v1/object/'+BUCKET+'/'+pairs[i][0],
+      {method:'POST',headers:{'Content-Type':'image/jpeg','x-upsert':'true'},body:pairs[i][1]});
+    if(!res.ok&&res.status!==409) throw new Error('照片上傳失敗 '+res.status);
+  }
+  p.uploaded=true; await putPhoto(p);
+}
+async function uploadPending(){
+  var ps=await allPhotos();
+  for(var i=0;i<ps.length;i++) if(!ps[i].uploaded){ try{ await upload(ps[i]) }catch(e){ break } }
+}
+async function ensurePhoto(id){
+  var p=await getPhoto(id);
+  if(p) return p;
+  if(!online()) return null;
+  try{
+    // 走帶金鑰的端點，bucket 可維持私有，照片不會被猜網址取走
+    var rf=await api('/storage/v1/object/'+BUCKET+'/'+id+'.jpg'),
+        rt=await api('/storage/v1/object/'+BUCKET+'/'+id+'_t.jpg');
+    if(!rf.ok||!rt.ok) return null;
+    var rec={id:id,full:await rf.blob(),thumb:await rt.blob(),created:Date.now(),uploaded:true};
+    await putPhoto(rec); return rec;
+  }catch(e){ return null }
+}
+
+/* ================= 渲染 ================= */
+function live(){return notes.filter(function(n){return !n.deleted})}
+function renderSites(){
+  var box=$('siteChips');box.innerHTML='';
+  sites.forEach(function(s){
+    var b=document.createElement('button');
+    b.type='button';b.className='chip'+(s===pick?' on':'');b.textContent=s;
+    if(s===pick){b.style.background=color(s);b.style.borderColor=color(s)}
+    b.onclick=function(){pick=s;renderSites()};
+    box.appendChild(b);
+  });
+}
+function stats(){var o=0,dn=0,late=0,now=Date.now();
+  live().forEach(function(n){if(n.done){dn++}else{o++;if(n.due&&n.due<now)late++}});
+  $('statOpen').textContent=o;$('statDone').textContent=dn;
+  var el=$('statLate');el.textContent=late;el.className=late?'hot':'';}
+function visible(){
+  return live().filter(function(n){
+    if(filter==='open'&&n.done)return false;
+    if(filter==='done'&&!n.done)return false;
+    if(filter==='due'&&(!n.due||n.done))return false;
+    if(filter==='mine'&&!(n.created_by===me()||n.updated_by===me()))return false;
+    if(q&&(n.text+' '+n.site+' '+(n.created_by||'')+' '+(n.updated_by||'')).toLowerCase().indexOf(q)<0)return false;
+    return true;
+  }).sort(function(a,b){
+    if(a.done!==b.done)return a.done?1:-1;
+    var ad=a.due||Infinity,bd=b.due||Infinity;
+    if(ad!==bd)return ad-bd;
+    if(!!a.star!==!!b.star)return a.star?-1:1;
+    return b.created-a.created});
+}
+function render(){
+  stats();list.innerHTML='';
+  var items=visible(),now=Date.now();
+  if(!items.length){empty.textContent=live().length
+    ?'這個條件下沒有備忘。換個篩選或清空搜尋。'
+    :'還沒有備忘。上面打一行字，按「建立」就記下來。';return}
+  empty.textContent='';
+  items.forEach(function(n){
+    var li=document.createElement('li');
+    var late=n.due&&!n.done&&n.due<now;
+    var soon=n.due&&!n.done&&!late&&n.due-now<864e5;
+    li.className='card'+(n.done?' done':'')+(late?' late':'');
+    li.style.setProperty('--c',color(n.site));
+    var np=(n.photos||[]).length;
+    var who=n.created_by?'<span class="who">@'+esc(n.created_by)
+      +(n.updated_by&&n.updated_by!==n.created_by?' ✎'+esc(n.updated_by):'')+'</span>':'';
+    li.innerHTML='<button class="check" aria-label="切換完成">'+(n.done?'✓':'')+'</button>'+
+      '<div class="body"><div class="text">'+esc(n.text)+'</div>'+
+      '<div class="meta"><span class="site">'+esc(n.site)+'</span><span>'+when(n.created)+'</span>'+who+
+      (n.dirty&&online()?'<span class="pend">待同步</span>':'')+
+      (n.due?'<span class="due'+(late?' late':soon?' soon':'')+'">'+dueLabel(n.due)+'</span>':'')+
+      (np?'<button class="clip" data-a="toggle">📎 '+np+(opened[n.id]?' ▲':' ▼')+'</button>':'')+
+      '<span class="acts"><button data-a="photo">＋照片</button>'+
+      '<button data-a="edit">編輯</button><button data-a="del">刪除</button></span></div></div>'+
+      '<button class="star'+(n.star?' on':'')+'" aria-label="標記重要">★</button>';
+    li.querySelector('.check').onclick=function(){n.done=!n.done;touch(n)};
+    li.querySelector('.star').onclick=function(){n.star=!n.star;touch(n)};
+    li.querySelector('[data-a="del"]').onclick=function(){removeNote(n)};
+    li.querySelector('[data-a="edit"]').onclick=function(){startEdit(li,n)};
+    li.querySelector('[data-a="photo"]').onclick=function(){attachTo=n;$('filePic').click()};
+    var tg=li.querySelector('[data-a="toggle"]');
+    if(tg) tg.onclick=function(){opened[n.id]=!opened[n.id];render()};
+    if(np&&opened[n.id]) shelf(li.querySelector('.body'),n);
+    list.appendChild(li);
+  });
+}
+async function shelf(body,n){
+  var box=document.createElement('div');box.className='shelf';body.appendChild(box);
+  for(var i=0;i<n.photos.length;i++){
+    var ph=document.createElement('div');ph.className='loading';ph.textContent='…';
+    box.appendChild(ph);
+    var p=await ensurePhoto(n.photos[i]);
+    if(!p){ ph.textContent='讀不到'; continue }
+    var im=document.createElement('img');
+    im.src=objURL(p.id+':t',p.thumb);im.loading='lazy';im.alt='附件照片';
+    (function(pid){im.onclick=function(){viewPhoto(pid,n)}})(p.id);
+    box.replaceChild(im,ph);
+  }
+  var add=document.createElement('button');
+  add.type='button';add.className='addph';add.textContent='＋ 加照片';
+  add.onclick=function(){attachTo=n;$('filePic').click()};
+  box.appendChild(add);
+}
+function startEdit(li,n){
+  var body=li.querySelector('.body');body.innerHTML='';
+  var ta=document.createElement('textarea');
+  ta.className='edit';ta.value=n.text;ta.rows=Math.max(2,n.text.split('\n').length);
+  var dt=document.createElement('input');
+  dt.type='datetime-local';dt.className='editdue';
+  if(n.due) dt.value=toLocalInput(n.due);
+  var row=document.createElement('div');row.className='meta';
+  var acts=document.createElement('span');acts.className='acts';
+  var ok=document.createElement('button');ok.textContent='儲存';
+  var no=document.createElement('button');no.textContent='取消';
+  acts.appendChild(ok);acts.appendChild(no);row.appendChild(acts);
+  body.appendChild(ta);body.appendChild(dt);body.appendChild(row);ta.focus();
+  ok.onclick=function(){
+    var v=ta.value.trim();if(v)n.text=v;
+    n.due=dt.value?new Date(dt.value).getTime():null;
+    touch(n)};
+  no.onclick=render;
+}
+async function touch(n){
+  n.updated=Date.now(); n.updated_by=me(); n.dirty=true;
+  await putNote(n); bump(); render(); scheduleSync();
+}
+async function removeNote(n){
+  if(!confirm('刪除這則備忘'+((n.photos||[]).length?'和它的 '+n.photos.length+' 張照片':'')+'？'))return;
+  n.deleted=true; delete opened[n.id];
+  if(!online()){
+    for(var i=0;i<(n.photos||[]).length;i++) await delPhoto(n.photos[i]);
+    await delNoteDB(n.id);
+    notes=notes.filter(function(x){return x.id!==n.id});
+    bump();render();return;
+  }
+  touch(n);
+}
+
+/* ================= 照片檢視 ================= */
+var viewing=null;
+async function viewPhoto(pid,n){
+  var p=await ensurePhoto(pid);if(!p)return;
+  viewing={p:p,n:n};$('viewerImg').src=objURL(p.id+':f',p.full);
+  $('viewer').classList.add('on');
+}
+$('viewerClose').onclick=function(){$('viewer').classList.remove('on');viewing=null};
+$('viewerDel').onclick=async function(){
+  if(!viewing||!confirm('刪除這張照片？'))return;
+  var n=viewing.n,pid=viewing.p.id;
+  n.photos=n.photos.filter(function(x){return x!==pid});
+  await delPhoto(pid);
+  $('viewer').classList.remove('on');viewing=null;
+  touch(n);
+};
+
+/* ================= 到期日 ================= */
+$('dueBtn').onclick=function(){
+  var box=$('duebox');box.classList.toggle('on');
+  if(box.classList.contains('on')&&!$('dueInput').value){
+    var d=new Date(Date.now()+864e5);d.setHours(9,0,0,0);
+    $('dueInput').value=toLocalInput(d.getTime());
+  }
+  syncDueBtn();
+};
+function syncDueBtn(){
+  var has=$('duebox').classList.contains('on')&&$('dueInput').value;
+  $('dueBtn').className='ghost'+(has?' set':'');
+  $('dueBtn').textContent=has?'⏰ '+dueLabel(new Date($('dueInput').value).getTime()).slice(2):'⏰ 到期';
+}
+$('dueInput').addEventListener('change',syncDueBtn);
+[].forEach.call($('duebox').querySelectorAll('[data-q]'),function(b){
+  b.onclick=function(){
+    var d=new Date();
+    if(b.dataset.q==='today18'){d.setHours(18,0,0,0)}
+    else if(b.dataset.q==='tmr9'){d.setDate(d.getDate()+1);d.setHours(9,0,0,0)}
+    else if(b.dataset.q==='week'){d.setDate(d.getDate()+((8-d.getDay())%7||7));d.setHours(9,0,0,0)}
+    else{$('dueInput').value='';syncDueBtn();return}
+    $('dueInput').value=toLocalInput(d.getTime());syncDueBtn();
+  };
+});
+
+/* ================= 建立 ================= */
+async function add(){
+  var v=input.value.trim();
+  if(!v&&!queue.length)return;
+  var due=($('duebox').classList.contains('on')&&$('dueInput').value)
+    ? new Date($('dueInput').value).getTime() : null;
+  var now=Date.now();
+  var n={id:uid(),text:v||'（照片）',site:pick,done:false,star:false,
+    created:now,updated:now,due:due,photos:[],deleted:false,
+    created_by:me(),updated_by:me(),dirty:true};
+  for(var i=0;i<queue.length;i++){
+    await putPhoto(queue[i]); n.photos.push(queue[i].id);
+  }
+  await putNote(n);notes.push(n);
+  queue=[];renderQueue();
+  input.value='';input.style.height='auto';
+  $('duebox').classList.remove('on');$('dueInput').value='';syncDueBtn();
+  if(filter==='done'){filter='open';syncSeg()}
+  bump();render();scheduleSync();
+  if(due) toast('已設定期限：'+dueLabel(due).slice(2));
+}
+function syncSeg(){[].forEach.call(document.querySelectorAll('#statusFilter button'),
+  function(b){b.classList.toggle('on',b.dataset.status===filter)})}
+
+/* ================= 橫幅 ================= */
+function checkBanner(){
+  var b=$('banner'),now=Date.now();
+  var late=live().filter(function(n){return !n.done&&n.due&&n.due<now});
+  if(late.length){
+    $('bannerTag').textContent='逾期';
+    $('bannerText').textContent='有 '+late.length+' 件已過期限。';
+    $('bannerBtn').textContent='只看有期限';
+    $('bannerBtn').onclick=function(){filter='due';syncSeg();render()};
+    b.classList.add('on');return;
+  }
+  if(online()){ b.classList.remove('on'); return }   // 有雲端就不必一直催備份
+  var days=lastBackup?Math.floor((now-lastBackup)/864e5):null;
+  var need=(lastBackup===0&&live().length>=5)||(days!==null&&days>=7)||changes>=40;
+  if(need){
+    $('bannerTag').textContent='提醒';
+    $('bannerText').textContent=lastBackup?'距離上次備份已 '+days+' 天，建議匯出一份。'
+      :'還沒備份過，資料只存在這台裝置。';
+    $('bannerBtn').textContent='立即備份';
+    $('bannerBtn').onclick=function(){$('exportBtn').click()};
+    b.classList.add('on');
+  }else b.classList.remove('on');
+}
+function bump(){changes++;putMeta('changes',changes);checkBanner()}
+
+/* ================= 設定面板 ================= */
+function openSheet(){
+  $('cfgUser').value=cfg.user;$('cfgUrl').value=cfg.url;$('cfgKey').value=cfg.key;
+  $('sheet').classList.add('on');
+}
+$('gearBtn').onclick=openSheet;
+$('cfgClose').onclick=function(){$('sheet').classList.remove('on')};
+$('cfgSave').onclick=async function(){
+  cfg.user=$('cfgUser').value.trim();
+  cfg.url=$('cfgUrl').value.trim().replace(/\/+$/,'');
+  cfg.key=$('cfgKey').value.trim();
+  await putMeta('cfg',cfg);
+  $('sheet').classList.remove('on');
+  if(online()){
+    // 首次啟用共用：把本機既有備忘全部標記為待上傳
+    for(var i=0;i<notes.length;i++){
+      if(!notes[i].created_by) notes[i].created_by=me();
+      if(!notes[i].updated) notes[i].updated=notes[i].created;
+      notes[i].dirty=true; await putNote(notes[i]);
+    }
+    for(var j=0;j<sites.length;j++) pushSite(sites[j]);
+    sync();
+  }else{ setSync('off','尚未設定共用（資料只存在本機）'); render() }
+  storageInfo();
+};
+$('cfgClear').onclick=async function(){
+  if(!confirm('停用共用？本機資料會保留，但不再和同事同步。'))return;
+  cfg={url:'',key:'',user:cfg.user};await putMeta('cfg',cfg);
+  $('sheet').classList.remove('on');setSync('off','尚未設定共用（資料只存在本機）');
+  render();storageInfo();
+};
+$('cfgLink').onclick=function(){
+  var u=$('cfgUrl').value.trim(),k=$('cfgKey').value.trim();
+  if(!u||!k){toast('請先填入網址和金鑰');return}
+  var link=location.origin+location.pathname+'#cfg='+
+    btoa(unescape(encodeURIComponent(JSON.stringify({url:u,key:k}))));
+  if(navigator.share){navigator.share({title:'工作備忘錄',text:'打開後輸入你的名字就能一起用',url:link})
+    .catch(function(){});return}
+  navigator.clipboard.writeText(link).then(function(){toast('連結已複製，傳給同事即可')},
+    function(){prompt('複製這個連結給同事：',link)});
+};
+$('syncNow').onclick=function(){ online()?sync():openSheet() };
+
+/* ================= 儲存空間 ================= */
+async function storageInfo(){
+  var txt=online()
+    ? '資料同步到 Supabase，同事看到的是同一份；離線時先存本機，恢復連線自動補上。'
+    : '資料只存在這台裝置（IndexedDB）。點右上 ⚙ 可設定與同事共用。';
+  try{
+    if(navigator.storage&&navigator.storage.estimate){
+      var e=await navigator.storage.estimate();
+      txt+=' 本機已使用 '+(e.usage/1048576).toFixed(1)+' MB。';
+    }
+  }catch(e){}
+  $('storageHint').textContent=txt;
+}
+
+/* ================= 備份／還原 ================= */
+function blobToDataURL(b){return new Promise(function(res,rej){
+  var r=new FileReader();r.onload=function(){res(r.result)};r.onerror=rej;r.readAsDataURL(b)})}
+function dataURLToBlob(d){
+  var parts=d.split(','),mime=/:(.*?);/.exec(parts[0])[1],bin=atob(parts[1]);
+  var arr=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type:mime});
+}
+$('exportBtn').onclick=async function(){
+ try{
+  toast('打包中…');
+  var ps=await allPhotos(),photos=[],skipped=0;
+  for(var i=0;i<ps.length;i++){
+    try{ photos.push({id:ps[i].id,full:await blobToDataURL(ps[i].full),thumb:await blobToDataURL(ps[i].thumb)}) }
+    catch(e){skipped++}
+  }
+  var data={version:4,exported:Date.now(),sites:sites,notes:notes,photos:photos};
+  var blob=new Blob([JSON.stringify(data)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='workmemo-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+  toast('備份已下載（'+(blob.size/1048576).toFixed(1)+' MB）');
+  lastBackup=Date.now();changes=0;putMeta('lastBackup',lastBackup);putMeta('changes',0);checkBanner();
+  if(skipped) toast('有 '+skipped+' 張照片讀取失敗，未包含在備份內');
+ }catch(err){ toast('備份失敗：'+(err&&err.message?err.message:'未知錯誤')) }
+};
+$('importBtn').onclick=function(){$('fileJson').click()};
+$('fileJson').onchange=function(){
+  var f=this.files[0];this.value='';if(!f)return;
+  var r=new FileReader();
+  r.onload=async function(){
+    try{
+      var d=JSON.parse(r.result);
+      if(!d.notes)throw 0;
+      if(!confirm('用備份覆蓋本機所有資料？'))return;
+      var ns=await allNotes();for(var i=0;i<ns.length;i++) await delNoteDB(ns[i].id);
+      var ps=await allPhotos();for(var j=0;j<ps.length;j++) await delPhoto(ps[j].id);
+      for(var k=0;k<(d.photos||[]).length;k++){
+        var p=d.photos[k];
+        try{ await putPhoto({id:p.id,full:dataURLToBlob(p.full),thumb:dataURLToBlob(p.thumb),
+          created:Date.now(),uploaded:false}) }catch(e){}
+      }
+      notes=d.notes.map(function(n){
+        n.updated=n.updated||n.created; n.deleted=!!n.deleted;
+        n.created_by=n.created_by||me(); n.updated_by=n.updated_by||me();
+        n.dirty=online(); return n});
+      for(var m=0;m<notes.length;m++) await putNote(notes[m]);
+      sites=(d.sites&&d.sites.length)?d.sites:DEFAULT_SITES.slice();
+      await putMeta('sites',sites);
+      pick=sites[0];urls={};opened={};renderSites();render();checkBanner();storageInfo();
+      toast('已還原備份');
+      if(online()) sync();
+    }catch(e){toast('這個檔案讀不出來，請選 workmemo 備份檔')}
+  };
+  r.readAsText(f);
+};
+
+/* ================= 其他操作 ================= */
+var HAS_KB=window.matchMedia&&window.matchMedia('(pointer:fine)').matches;
+input.addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px'});
+input.addEventListener('keydown',function(e){
+  if(HAS_KB&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();add()}});
+$('addBtn').onclick=add;
+$('picBtn').onclick=function(){attachTo=null;$('filePic').click()};
+$('filePic').onchange=async function(){
+  var fs=Array.prototype.slice.call(this.files);this.value='';
+  if(!fs.length)return;
+  if(attachTo){
+    var n=attachTo;attachTo=null;
+    var before=queue.length;await intake(fs);
+    var added=queue.splice(before);
+    for(var i=0;i<added.length;i++){
+      await putPhoto(added[i]);n.photos=(n.photos||[]).concat(added[i].id);
+    }
+    opened[n.id]=true;renderQueue();
+    toast('已附加 '+added.length+' 張照片');
+    touch(n);
+  }else{ await intake(fs);toast('照片已加入，按「建立」存檔'); }
+};
+$('addSiteBtn').onclick=function(){
+  var name=prompt('新增站點名稱');if(!name)return;name=name.trim();if(!name)return;
+  if(sites.indexOf(name)<0)sites.push(name);
+  pick=name;putMeta('sites',sites);renderSites();pushSite(name)};
+$('search').addEventListener('input',function(){q=this.value.trim().toLowerCase();render()});
+[].forEach.call(document.querySelectorAll('#statusFilter button'),function(b){
+  b.onclick=function(){filter=b.dataset.status;syncSeg();render()}});
+$('copyBtn').onclick=function(){
+  var open=live().filter(function(n){return !n.done});
+  if(!open.length){toast('目前沒有待辦');return}
+  var txt=open.map(function(n){return '・['+n.site+'] '+n.text+
+    (n.due?'（'+dueLabel(n.due).slice(2)+'）':'')+
+    (n.created_by?'（'+n.created_by+'）':'')+
+    ((n.photos||[]).length?'（附 '+n.photos.length+' 張照片）':'')}).join('\n');
+  if(navigator.share){navigator.share({text:txt}).catch(function(){});return}
+  navigator.clipboard.writeText(txt).then(function(){toast('已複製待辦清單')},
+    function(){prompt('手動複製：',txt)});
+};
+$('clearBtn').onclick=async function(){
+  var done=live().filter(function(n){return n.done});
+  if(!done.length){toast('沒有已完成的項目');return}
+  if(!confirm('刪除 '+done.length+' 則已完成的備忘（含其照片）？'+(online()?'\n同事那邊也會一起消失。':'')))return;
+  for(var i=0;i<done.length;i++){
+    if(online()){
+      done[i].deleted=true;done[i].updated=Date.now();done[i].updated_by=me();done[i].dirty=true;
+      await putNote(done[i]);
+    }else{
+      for(var j=0;j<(done[i].photos||[]).length;j++) await delPhoto(done[i].photos[j]);
+      await delNoteDB(done[i].id);
+      notes=notes.filter(function(n){return n.id!==done[i].id});
+    }
+  }
+  bump();render();scheduleSync();
+};
+
+/* ================= 啟動 ================= */
+(async function boot(){
+  try{ await openDB(); }
+  catch(e){ $('empty').textContent='這台裝置不允許本機資料庫，請關閉無痕模式再試。';return; }
+  notes=await allNotes();
+  var s=await getMeta('sites');if(s&&s.length)sites=s;
+  lastBackup=(await getMeta('lastBackup'))||0;
+  changes=(await getMeta('changes'))||0;
+  lastPull=(await getMeta('lastPull'))||lastPull;
+  cfg=(await getMeta('cfg'))||cfg;
+
+  // 從同事寄來的連結帶入設定
+  var m=/#cfg=([^&]+)/.exec(location.hash||'');
+  if(m){
+    try{
+      var inc=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+      if(inc.url&&inc.key){ cfg.url=inc.url;cfg.key=inc.key;await putMeta('cfg',cfg) }
+    }catch(e){}
+    history.replaceState(null,'',location.pathname);
+  }
+
+  pick=sites[0];syncDueBtn();
+  renderSites();render();checkBanner();storageInfo();
+
+  if(online()){
+    if(!cfg.user){ openSheet(); toast('請先輸入你的名字') }
+    sync(true);
+    setInterval(function(){sync(true)},20000);
+    document.addEventListener('visibilitychange',function(){
+      if(document.visibilityState==='visible') sync(true)});
+    window.addEventListener('online',function(){sync(true)});
+  }else{
+    setSync('off','尚未設定共用（資料只存在本機）');
+  }
+  setInterval(function(){stats();checkBanner()},60000);
+  if('serviceWorker' in navigator&&location.protocol!=='file:')
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
+})();
+</script>
+</body>
+</html>
