@@ -72,6 +72,11 @@
   .sitecard .nums b{color:var(--paper);font-size:14px;font-weight:600;margin-right:3px}
   .sitecard .nums .late b{color:var(--red)}
   .sitecard .nums .shp b{color:var(--coolant)}
+  .sitecard{position:relative}
+  .sitecard .del{position:absolute;top:-7px;right:-7px;width:26px;height:26px;border-radius:50%;
+    background:var(--red);border:0;color:#fff;font-size:14px;line-height:1;padding:0;
+    display:flex;align-items:center;justify-content:center}
+  .grid.manage{padding-top:8px;padding-right:8px}
 
   .ship{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c);
     border-radius:10px;padding:12px;margin-bottom:8px}
@@ -254,7 +259,10 @@
 
     <section id="paneSites" class="hide">
       <div class="grid" id="siteGrid"></div>
-      <button class="ghost wide" id="addSiteBtn" type="button" style="margin-top:10px">＋ 新增站點</button>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="ghost" id="addSiteBtn" type="button" style="flex:1">＋ 新增站點</button>
+        <button class="ghost" id="manageBtn" type="button" style="flex:1">管理站點</button>
+      </div>
     </section>
   </div>
 
@@ -410,7 +418,7 @@ var BUCKET='memo-photos';
 var notes=[],ships=[],sites=DEFAULT_SITES.slice();
 var view='home',tab='board',curSite='',editingShip=null;
 var filter='open',q='',shipFilter='active',shipQ='';
-var opened={},queue=[],urls={},attachTo=null;
+var opened={},queue=[],urls={},attachTo=null,manageMode=false;
 var cfg={url:'',key:'',user:''};
 var pullMark={notes:'1970-01-01T00:00:00Z',shipments:'1970-01-01T00:00:00Z'};
 var syncing=false,syncTimer=null;
@@ -681,7 +689,7 @@ function renderBoard(){
   });
 }
 function renderSiteGrid(){
-  var box=$('siteGrid');box.innerHTML='';
+  var box=$('siteGrid');box.innerHTML='';box.className='grid'+(manageMode?' manage':'');
   var now=Date.now();
   sites.forEach(function(name){
     var ns=liveNotes().filter(function(n){return n.site===name});
@@ -694,12 +702,43 @@ function renderSiteGrid(){
       '<span><b>'+open+'</b>待辦</span>'+
       (late?'<span class="late"><b>'+late+'</b>逾期</span>':'')+
       (sh?'<span class="shp"><b>'+sh+'</b>在途</span>':'')+'</div>';
-    b.onclick=function(){enterSite(name)};
+    b.onclick=function(){if(!manageMode) enterSite(name)};
+    if(manageMode){
+      var x=document.createElement('button');
+      x.type='button';x.className='del';x.textContent='✕';
+      x.onclick=function(ev){ev.stopPropagation();removeSite(name)};
+      b.appendChild(x);
+    }
     box.appendChild(b);
   });
   var dl=$('siteOptions');dl.innerHTML='';
   sites.forEach(function(n){var o=document.createElement('option');o.value=n;dl.appendChild(o)});
 }
+
+async function removeSite(name){
+  var ns=liveNotes().filter(function(n){return n.site===name});
+  var ss=liveShips().filter(function(s){return s.customer===name});
+  if(ns.length||ss.length){
+    alert('「'+name+'」還有 '+ns.length+' 則備忘、'+ss.length+' 筆出貨資料。\n'+
+      '請先把它們刪掉或改到別的站點，再刪除這個站點。');
+    return;
+  }
+  if(!confirm('刪除站點「'+name+'」？'+(online()?'\n同事那邊也會消失。':''))) return;
+  sites=sites.filter(function(x){return x!==name});
+  await putMeta('sites',sites);
+  if(online()){
+    try{ await api('/rest/v1/sites?name=eq.'+encodeURIComponent(name),{method:'DELETE'}) }
+    catch(e){ toast('站點已從這台裝置移除，但雲端刪除失敗，下次同步會再出現') }
+  }
+  render();
+}
+$('manageBtn').onclick=function(){
+  manageMode=!manageMode;
+  $('manageBtn').textContent=manageMode?'完成':'管理站點';
+  $('manageBtn').className='ghost'+(manageMode?' set':'');
+  toast(manageMode?'點右上角 ✕ 可刪除空的站點':'');
+  render();
+};
 
 /* ---- 出貨表單 ---- */
 function openShip(s){
