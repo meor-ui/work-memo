@@ -20,17 +20,21 @@
     font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
     -webkit-font-smoothing:antialiased}
   body{padding:max(10px,env(safe-area-inset-top)) 12px calc(16px + env(safe-area-inset-bottom))}
-  #app{max-width:680px;margin:0 auto}
+  #app{max-width:720px;margin:0 auto}
   button{font-family:inherit;cursor:pointer}
+  a{color:var(--coolant)}
   :focus-visible{outline:2px solid var(--coolant);outline-offset:2px}
+  .hide{display:none !important}
 
   .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;
-       padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:12px;
+       padding:4px 0 12px;border-bottom:1px solid var(--line);margin-bottom:10px;
        position:sticky;top:0;background:var(--ink);z-index:5}
   .brand{display:flex;align-items:center;gap:8px;min-width:0}
-  .brand h1{font-size:16px;margin:0;font-weight:600;white-space:nowrap}
+  .brand h1{font-size:16px;margin:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;
-       color:var(--ink);background:var(--coolant);padding:3px 6px;border-radius:3px}
+       color:var(--ink);background:var(--coolant);padding:3px 6px;border-radius:3px;flex:none}
+  .back{background:transparent;border:1px solid var(--line);color:var(--paper);
+    border-radius:8px;padding:8px 11px;font-size:13px;flex:none}
   .right{display:flex;align-items:center;gap:10px}
   .readout{display:flex;gap:12px;font-family:var(--mono)}
   .readout div{text-align:right;line-height:1.1}
@@ -40,12 +44,17 @@
   .gear{background:transparent;border:1px solid var(--line);color:var(--muted);
     border-radius:8px;width:38px;height:38px;font-size:15px;flex:none}
   .syncline{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);
-    font-family:var(--mono);margin:-6px 0 12px}
+    font-family:var(--mono);margin:0 0 12px}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
   .dot.ok{background:var(--green)} .dot.busy{background:var(--amber)}
   .dot.err{background:var(--red)} .dot.off{background:var(--line)}
   .syncline button{margin-left:auto;background:transparent;border:1px solid var(--line);
-    color:var(--muted);border-radius:6px;padding:5px 9px;font-size:11px}
+    color:var(--muted);border-radius:6px;padding:5px 9px;font-size:11px;flex:none}
+
+  .tabs{display:flex;width:100%;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;overflow:hidden;margin-bottom:12px}
+  .tabs button{flex:1;background:transparent;border:0;color:var(--muted);padding:13px 6px;font-size:14px}
+  .tabs button.on{background:var(--panel-2);color:var(--paper);font-weight:600}
 
   .banner{display:none;align-items:center;gap:10px;background:var(--panel-2);
     border:1px solid var(--amber);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px}
@@ -54,14 +63,47 @@
   .banner button{margin-left:auto;background:var(--amber);border:0;color:var(--ink);
     border-radius:6px;padding:8px 12px;font-size:13px;font-weight:600;white-space:nowrap}
 
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .sitecard{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c);
+    border-radius:10px;padding:13px;text-align:left;color:var(--paper);min-height:88px;
+    display:flex;flex-direction:column;justify-content:space-between}
+  .sitecard .nm{font-size:15px;font-weight:600;margin-bottom:8px;word-break:break-all}
+  .sitecard .nums{display:flex;gap:10px;font-family:var(--mono);font-size:11px;color:var(--muted);flex-wrap:wrap}
+  .sitecard .nums b{color:var(--paper);font-size:14px;font-weight:600;margin-right:3px}
+  .sitecard .nums .late b{color:var(--red)}
+  .sitecard .nums .shp b{color:var(--coolant)}
+
+  .ship{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c);
+    border-radius:10px;padding:12px;margin-bottom:8px}
+  .ship.done{opacity:.5}
+  .ship .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .ship .no{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .ship .cust{font-size:15px;font-weight:600;color:var(--c)}
+  .ship .stage{margin-left:auto;font-size:11px;border:1px solid var(--line);
+    border-radius:999px;padding:3px 9px;color:var(--muted);white-space:nowrap}
+  .ship .stage.go{color:var(--coolant);border-color:var(--coolant)}
+  .ship .stage.warn{color:var(--amber);border-color:var(--amber)}
+  .ship .stage.ok{color:var(--green);border-color:var(--green)}
+  .ship .items{font-size:15px;line-height:1.55;margin-top:7px;white-space:pre-wrap;word-break:break-word}
+  .ship .spec{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:5px;white-space:pre-wrap}
+  .ship .addr{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6;word-break:break-all}
+  .ship .track{display:flex;gap:6px;margin-top:10px}
+  .ship .leg{flex:1;border-top:2px solid var(--line);padding-top:6px;font-size:11px;
+    color:var(--muted);font-family:var(--mono)}
+  .ship .leg.set{border-color:var(--coolant);color:var(--paper)}
+  .ship .leg.past{border-color:var(--green)}
+  .ship .leg span{display:block;font-size:10px;color:var(--muted)}
+  .ship .foot{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;
+    color:var(--muted);font-family:var(--mono);flex-wrap:wrap}
+  .ship .foot .acts{margin-left:auto;display:flex;gap:2px}
+  .ship .foot button{background:transparent;border:0;color:var(--muted);font-size:12.5px;
+    padding:6px 8px;border-radius:5px}
+  .pend{color:var(--amber)}
+
   .composer{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
   .composer textarea{width:100%;background:transparent;border:0;resize:none;color:var(--paper);
        font-size:16px;line-height:1.55;padding:4px 2px;min-height:30px;font-family:inherit}
   .composer textarea::placeholder{color:var(--muted)}
-  .sites{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
-  .chip{border:1px solid var(--line);background:transparent;color:var(--muted);
-        border-radius:999px;padding:7px 12px;font-size:13px}
-  .chip.on{color:var(--ink);font-weight:600}
   .composer-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
   .cf-left{display:flex;gap:6px;flex-wrap:wrap}
   .primary{background:var(--coolant);color:var(--ink);border:0;border-radius:8px;
@@ -69,6 +111,7 @@
   .ghost{background:transparent;border:1px solid var(--line);color:var(--muted);
          border-radius:8px;padding:10px 12px;font-size:13px;min-height:44px}
   .ghost.set{color:var(--amber);border-color:var(--amber)}
+  .wide{width:100%;margin-bottom:10px}
   .duebox{display:none;align-items:center;gap:8px;margin:0 0 10px;flex-wrap:wrap}
   .duebox.on{display:flex}
   .duebox input{background:var(--ink);border:1px solid var(--line);border-radius:8px;
@@ -89,7 +132,7 @@
   .segmented{display:flex;width:100%;background:var(--panel);border:1px solid var(--line);
        border-radius:8px;overflow:hidden}
   .segmented button{flex:1;min-width:0;background:transparent;border:0;color:var(--muted);
-       padding:12px 6px;font-size:13px;white-space:nowrap}
+       padding:12px 4px;font-size:13px;white-space:nowrap}
   .segmented button.on{background:var(--panel-2);color:var(--paper);font-weight:600}
 
   .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -106,11 +149,8 @@
   .text{font-size:15.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
   .meta{display:flex;align-items:center;gap:8px;margin-top:7px;font-family:var(--mono);
         font-size:11px;color:var(--muted);flex-wrap:wrap}
-  .meta .site{color:var(--c,var(--coolant))}
   .who{color:var(--muted)}
-  .pend{color:var(--amber)}
-  .due{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11px;
-       background:transparent;color:var(--muted)}
+  .due{border:1px solid var(--line);border-radius:999px;padding:4px 9px;font-size:11px;color:var(--muted)}
   .due.soon{color:var(--amber);border-color:var(--amber)}
   .due.late{color:var(--red);border-color:var(--red)}
   .clip{background:var(--panel-2);border:1px solid var(--line);color:var(--paper);
@@ -130,7 +170,8 @@
   .editdue{background:var(--ink);border:1px solid var(--line);border-radius:6px;color:var(--paper);
         padding:9px;font-size:14px;font-family:inherit;color-scheme:dark;margin-top:8px;width:100%}
 
-  .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:26px 10px;margin:0}
+  .empty{color:var(--muted);font-size:13.5px;text-align:center;padding:26px 10px;margin:0;
+    line-height:1.8;white-space:pre-line}
   .foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
   .foot button{flex:1 1 46%}
   .hint{font-size:11px;color:var(--muted);text-align:center;margin:12px 0 2px;line-height:1.7}
@@ -145,18 +186,22 @@
   .viewer .vbar button{flex:1}
 
   .sheet{position:fixed;inset:0;background:rgba(6,12,17,.9);display:none;z-index:50;
-     overflow:auto;padding:24px 14px calc(24px + env(safe-area-inset-bottom))}
+     overflow:auto;padding:20px 12px calc(24px + env(safe-area-inset-bottom))}
   .sheet.on{display:block}
-  .sheetbox{max-width:520px;margin:0 auto;background:var(--panel);border:1px solid var(--line);
+  .sheetbox{max-width:560px;margin:0 auto;background:var(--panel);border:1px solid var(--line);
      border-radius:12px;padding:16px}
   .sheetbox h2{font-size:16px;margin:0 0 4px}
   .sheetbox p{font-size:12.5px;color:var(--muted);line-height:1.7;margin:0 0 14px}
-  .field{margin-bottom:12px}
+  .field{margin-bottom:11px}
+  .row2{display:flex;gap:8px;flex-wrap:wrap}
+  .row2 .field{flex:1 1 150px}
   .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
-  .field input{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:8px;
-     color:var(--paper);padding:11px;font-size:15px;font-family:inherit;min-height:46px}
+  .field input,.field textarea{width:100%;background:var(--ink);border:1px solid var(--line);
+     border-radius:8px;color:var(--paper);padding:11px;font-size:15px;font-family:inherit;min-height:46px;
+     color-scheme:dark;resize:vertical}
+  .field textarea{min-height:60px;line-height:1.5}
   .field small{display:block;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
-  .sheetfoot{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .sheetfoot{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
   .sheetfoot button{flex:1 1 46%}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -164,12 +209,16 @@
 <body>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="tag">MEMO</span><h1>工作備忘錄</h1></div>
+    <div class="brand">
+      <button class="back hide" id="backBtn" type="button">←</button>
+      <span class="tag" id="tagEl">MEMO</span>
+      <h1 id="titleEl">工作備忘錄</h1>
+    </div>
     <div class="right">
       <div class="readout">
         <div><b id="statLate">0</b><span>逾期</span></div>
         <div><b id="statOpen">0</b><span>待辦</span></div>
-        <div><b id="statDone">0</b><span>完成</span></div>
+        <div><b id="statShip">0</b><span>在途</span></div>
       </div>
       <button class="gear" id="gearBtn" type="button" aria-label="設定">⚙</button>
     </div>
@@ -180,50 +229,80 @@
     <button id="syncNow" type="button">立即同步</button>
   </div>
 
-  <div class="banner" id="banner"><b id="bannerTag">提醒</b><span id="bannerText"></span><button id="bannerBtn" type="button">立即備份</button></div>
+  <div class="banner" id="banner"><b id="bannerTag">提醒</b><span id="bannerText"></span><button id="bannerBtn" type="button">查看</button></div>
 
-  <section class="composer">
-    <textarea id="input" rows="1" placeholder="記一件事…"></textarea>
-    <div class="queue" id="queue"></div>
-    <div class="duebox" id="duebox">
-      <input type="datetime-local" id="dueInput" />
-      <div class="quick">
-        <button type="button" data-q="today18">今天 18:00</button>
-        <button type="button" data-q="tmr9">明天 09:00</button>
-        <button type="button" data-q="week">下週一 09:00</button>
-        <button type="button" data-q="clear">清除</button>
+  <div id="viewHome">
+    <div class="tabs" id="homeTabs">
+      <button class="on" data-tab="board" type="button">出貨看板</button>
+      <button data-tab="sites" type="button">站點備忘</button>
+    </div>
+
+    <section id="paneBoard">
+      <button class="primary wide" id="newShipBtn" type="button">＋ 新增出貨</button>
+      <div class="filters">
+        <input id="shipSearch" type="search" placeholder="搜尋單號、客戶、項目" />
+        <div class="segmented" id="shipFilter">
+          <button class="on" data-sf="active" type="button">進行中</button>
+          <button data-sf="week" type="button">近七天</button>
+          <button data-sf="done" type="button">已結案</button>
+          <button data-sf="all" type="button">全部</button>
+        </div>
       </div>
-    </div>
-    <div class="sites" id="siteChips"></div>
-    <div class="composer-foot">
-      <div class="cf-left">
-        <button class="ghost" id="picBtn" type="button">🖼 相簿</button>
-        <button class="ghost" id="dueBtn" type="button">⏰ 到期</button>
-        <button class="ghost" id="addSiteBtn" type="button">＋站點</button>
+      <div id="shipList"></div>
+      <p id="shipEmpty" class="empty"></p>
+    </section>
+
+    <section id="paneSites" class="hide">
+      <div class="grid" id="siteGrid"></div>
+      <button class="ghost wide" id="addSiteBtn" type="button" style="margin-top:10px">＋ 新增站點</button>
+    </section>
+  </div>
+
+  <div id="viewSite" class="hide">
+    <section class="composer">
+      <textarea id="input" rows="1" placeholder="記一件事…"></textarea>
+      <div class="queue" id="queue"></div>
+      <div class="duebox" id="duebox">
+        <input type="datetime-local" id="dueInput" />
+        <div class="quick">
+          <button type="button" data-q="today18">今天 18:00</button>
+          <button type="button" data-q="tmr9">明天 09:00</button>
+          <button type="button" data-q="week">下週一 09:00</button>
+          <button type="button" data-q="clear">清除</button>
+        </div>
       </div>
-      <button class="primary" id="addBtn" type="button">建立</button>
-    </div>
-  </section>
+      <div class="composer-foot">
+        <div class="cf-left">
+          <button class="ghost" id="picBtn" type="button">🖼 相簿</button>
+          <button class="ghost" id="dueBtn" type="button">⏰ 到期</button>
+        </div>
+        <button class="primary" id="addBtn" type="button">建立</button>
+      </div>
+    </section>
 
-  <section class="filters">
-    <input id="search" type="search" placeholder="搜尋內容、站點或人名" />
-    <div class="segmented" id="statusFilter">
-      <button class="on" data-status="open" type="button">待辦</button>
-      <button data-status="due" type="button">有期限</button>
-      <button data-status="mine" type="button">我的</button>
-      <button data-status="done" type="button">完成</button>
-      <button data-status="all" type="button">全部</button>
-    </div>
-  </section>
+    <section class="filters">
+      <input id="search" type="search" placeholder="搜尋內容或人名" />
+      <div class="segmented" id="statusFilter">
+        <button class="on" data-status="open" type="button">待辦</button>
+        <button data-status="due" type="button">有期限</button>
+        <button data-status="mine" type="button">我的</button>
+        <button data-status="done" type="button">完成</button>
+        <button data-status="all" type="button">全部</button>
+      </div>
+    </section>
 
-  <ul id="list" class="list"></ul>
-  <p id="empty" class="empty"></p>
+    <ul id="list" class="list"></ul>
+    <p id="empty" class="empty"></p>
+
+    <footer class="foot">
+      <button class="ghost" id="copyBtn" type="button">複製這站待辦</button>
+      <button class="ghost" id="clearBtn" type="button">清除已完成</button>
+    </footer>
+  </div>
 
   <footer class="foot">
-    <button class="ghost" id="copyBtn" type="button">複製待辦清單</button>
     <button class="ghost" id="exportBtn" type="button">備份（含照片）</button>
     <button class="ghost" id="importBtn" type="button">還原備份</button>
-    <button class="ghost" id="clearBtn" type="button">清除已完成</button>
   </footer>
   <input type="file" id="fileJson" accept="application/json" hidden />
   <input type="file" id="filePic" accept="image/*" multiple hidden />
@@ -239,24 +318,50 @@
   </div>
 </div>
 
+<div class="sheet" id="shipSheet">
+  <div class="sheetbox">
+    <h2 id="shipFormTitle">新增出貨</h2>
+    <div class="row2">
+      <div class="field"><label for="fNo">單號</label><input id="fNo" placeholder="LCS2026040801-02" /></div>
+      <div class="field"><label for="fCust">客戶端／站點</label>
+        <input id="fCust" list="siteOptions" placeholder="智邦 竹北" /><datalist id="siteOptions"></datalist></div>
+    </div>
+    <div class="field"><label for="fItems">項目／數量</label>
+      <textarea id="fItems" placeholder="冷板*26套"></textarea></div>
+    <div class="row2">
+      <div class="field"><label for="fDims">材積尺寸</label>
+        <textarea id="fDims" placeholder="1200*800*726mm"></textarea></div>
+      <div class="field"><label for="fWeight">重量</label><input id="fWeight" placeholder="151.28KG" /></div>
+    </div>
+    <div class="field"><label for="fAddr">地點</label>
+      <textarea id="fAddr" placeholder="竹北市智慧一路1號"></textarea></div>
+    <div class="field"><label for="fContact">聯絡人／電話</label>
+      <input id="fContact" placeholder="范聖央 0919968960" />
+      <small>填了電話，卡片上會出現可直接撥號的連結。</small></div>
+    <div class="row2">
+      <div class="field"><label for="fPickup">提貨時間</label><input type="date" id="fPickup" /></div>
+      <div class="field"><label for="fCustoms">清關</label><input type="date" id="fCustoms" /></div>
+      <div class="field"><label for="fDelivery">派送時間</label><input type="date" id="fDelivery" /></div>
+    </div>
+    <div class="field"><label for="fNote">備註</label><textarea id="fNote"></textarea></div>
+    <div class="sheetfoot">
+      <button class="primary" id="shipSave" type="button">儲存</button>
+      <button class="ghost" id="shipCancel" type="button">取消</button>
+      <button class="ghost" id="shipDelete" type="button">刪除這筆</button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet" id="sheet">
   <div class="sheetbox">
     <h2>設定</h2>
-    <p>填好之後，這台裝置就會和同事共用同一份備忘。沒填也能用，只是資料只留在本機。</p>
-    <div class="field">
-      <label for="cfgUser">你的名字</label>
-      <input id="cfgUser" placeholder="例如：Ian" />
-      <small>會標在你建立或修改的每一則備忘上，讓同事知道是誰寫的。</small>
-    </div>
-    <div class="field">
-      <label for="cfgUrl">Supabase 專案網址</label>
-      <input id="cfgUrl" placeholder="https://xxxxx.supabase.co" inputmode="url" />
-    </div>
-    <div class="field">
-      <label for="cfgKey">Supabase anon key</label>
-      <input id="cfgKey" placeholder="eyJhbGciOi..." />
-      <small>在 Supabase 後台 Settings → API 取得。這把金鑰會出現在網頁原始碼裡，任何拿到網址的人都能讀寫，請只放非機密內容。</small>
-    </div>
+    <p>填好之後，這台裝置就會和同事共用同一份資料。沒填也能用，只是資料只留在本機。</p>
+    <div class="field"><label for="cfgUser">你的名字</label><input id="cfgUser" placeholder="例如：Ian" />
+      <small>會標在你建立或修改的每一筆資料上。</small></div>
+    <div class="field"><label for="cfgUrl">Supabase 專案網址</label>
+      <input id="cfgUrl" placeholder="https://xxxxx.supabase.co" inputmode="url" /></div>
+    <div class="field"><label for="cfgKey">Supabase anon key</label><input id="cfgKey" placeholder="eyJhbGciOi..." />
+      <small>任何拿到網址的人都能讀寫，請只放非機密內容。</small></div>
     <div class="sheetfoot">
       <button class="primary" id="cfgSave" type="button">儲存並同步</button>
       <button class="ghost" id="cfgLink" type="button">產生同事用連結</button>
@@ -271,12 +376,13 @@
 /* ================= IndexedDB ================= */
 var DB=null;
 function openDB(){return new Promise(function(res,rej){
-  var r=indexedDB.open('workmemo',1);
+  var r=indexedDB.open('workmemo',2);
   r.onupgradeneeded=function(){
     var db=r.result;
     if(!db.objectStoreNames.contains('notes')) db.createObjectStore('notes',{keyPath:'id'});
     if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
     if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'k'});
+    if(!db.objectStoreNames.contains('ships')) db.createObjectStore('ships',{keyPath:'id'});
   };
   r.onsuccess=function(){DB=r.result;res(DB)};
   r.onerror=function(){rej(r.error)};
@@ -287,6 +393,9 @@ function req(r){return new Promise(function(res,rej){
 function putNote(n){return req(stx('notes','readwrite').put(n))}
 function delNoteDB(id){return req(stx('notes','readwrite').delete(id))}
 function allNotes(){return req(stx('notes').getAll())}
+function putShipDB(s){return req(stx('ships','readwrite').put(s))}
+function delShipDB(id){return req(stx('ships','readwrite').delete(id))}
+function allShipsDB(){return req(stx('ships').getAll())}
 function putPhoto(p){return req(stx('photos','readwrite').put(p))}
 function getPhoto(id){return req(stx('photos').get(id))}
 function delPhoto(id){return req(stx('photos','readwrite').delete(id))}
@@ -296,22 +405,26 @@ function getMeta(k){return req(stx('meta').get(k)).then(function(r){return r?r.v
 
 /* ================= 狀態 ================= */
 var PALETTE=['#3fc8dd','#ffa14a','#a78bfa','#5ed6a0','#ff7f9e','#7ab7ff'];
-var DEFAULT_SITES=['英業達桃園','英業達大溪','智邦竹北','辦公室','其他'];
+var DEFAULT_SITES=['智邦 竹北','智邦 新竹','英業達桃園','英業達大溪','緯創','辦公室','其他'];
 var BUCKET='memo-photos';
-var notes=[],sites=DEFAULT_SITES.slice(),pick=DEFAULT_SITES[0];
-var filter='open',q='',opened={},queue=[],urls={},attachTo=null;
-var cfg={url:'',key:'',user:''},lastPull='1970-01-01T00:00:00Z';
-var lastBackup=0,changes=0,syncing=false,syncTimer=null;
+var notes=[],ships=[],sites=DEFAULT_SITES.slice();
+var view='home',tab='board',curSite='',editingShip=null;
+var filter='open',q='',shipFilter='active',shipQ='';
+var opened={},queue=[],urls={},attachTo=null;
+var cfg={url:'',key:'',user:''};
+var pullMark={notes:'1970-01-01T00:00:00Z',shipments:'1970-01-01T00:00:00Z'};
+var syncing=false,syncTimer=null;
 var $=function(id){return document.getElementById(id)};
-var list=$('list'),empty=$('empty'),input=$('input');
 
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');
   clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},2200)}
-function color(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%997;
+function color(s){var h=0;s=s||'';for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%997;
   return PALETTE[h%PALETTE.length]}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function p2(x){return x<10?'0'+x:''+x}
+function today(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function md(ds){if(!ds)return '—';var p=String(ds).split('-');return (+p[1])+'/'+(+p[2])}
 function when(t){var d=new Date(t),n=new Date();
   return (d.toDateString()===n.toDateString()?'今天':(d.getMonth()+1)+'/'+d.getDate())
     +' '+p2(d.getHours())+':'+p2(d.getMinutes())}
@@ -325,7 +438,10 @@ function toLocalInput(t){var d=new Date(t);
   return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes())}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,9)}
 function me(){return cfg.user||'未具名'}
-function online(){return cfg.url&&cfg.key}
+function online(){return !!(cfg.url&&cfg.key)}
+function liveNotes(){return notes.filter(function(n){return !n.deleted})}
+function liveShips(){return ships.filter(function(s){return !s.deleted})}
+function phones(txt){return (String(txt||'').match(/0\d{1,3}-?\d{3}-?\d{3,4}/g)||[])}
 
 /* ================= Supabase REST ================= */
 function api(path,opts){
@@ -333,75 +449,89 @@ function api(path,opts){
   var h=Object.assign({apikey:cfg.key,Authorization:'Bearer '+cfg.key},opts.headers||{});
   return fetch(cfg.url.replace(/\/+$/,'')+path,Object.assign({},opts,{headers:h}));
 }
-function toRow(n){
+function noteRow(n){
   return {id:n.id,text:n.text,site:n.site,done:!!n.done,star:!!n.star,
     due:n.due?new Date(n.due).toISOString():null,
     created_at:new Date(n.created).toISOString(),
     updated_at:new Date(n.updated||n.created).toISOString(),
-    deleted:!!n.deleted,created_by:n.created_by||'',updated_by:n.updated_by||'',
-    photos:n.photos||[]};
+    deleted:!!n.deleted,created_by:n.created_by||'',updated_by:n.updated_by||'',photos:n.photos||[]};
 }
-function fromRow(r){
+function noteFrom(r){
   return {id:r.id,text:r.text||'',site:r.site||'其他',done:!!r.done,star:!!r.star,
     due:r.due?new Date(r.due).getTime():null,
-    created:new Date(r.created_at).getTime(),
-    updated:new Date(r.updated_at).getTime(),
+    created:new Date(r.created_at).getTime(),updated:new Date(r.updated_at).getTime(),
     deleted:!!r.deleted,created_by:r.created_by||'',updated_by:r.updated_by||'',
     photos:r.photos||[],dirty:false};
 }
-function setSync(cls,text){
-  $('dot').className='dot '+cls; $('syncText').textContent=text;
+var SHIP_F=['no','customer','items','dims','weight','address','contact','pickup','customs','delivery','note'];
+var SHIP_D=['pickup','customs','delivery'];
+function shipRow(s){
+  var o={id:s.id,done:!!s.done,deleted:!!s.deleted,
+    created_at:new Date(s.created).toISOString(),
+    updated_at:new Date(s.updated||s.created).toISOString(),
+    created_by:s.created_by||'',updated_by:s.updated_by||''};
+  SHIP_F.forEach(function(f){o[f]=SHIP_D.indexOf(f)>=0?(s[f]||null):(s[f]||'')});
+  return o;
 }
-async function push(){
-  var dirty=notes.filter(function(n){return n.dirty});
+function shipFrom(r){
+  var o={id:r.id,done:!!r.done,deleted:!!r.deleted,
+    created:new Date(r.created_at).getTime(),updated:new Date(r.updated_at).getTime(),
+    created_by:r.created_by||'',updated_by:r.updated_by||'',dirty:false};
+  SHIP_F.forEach(function(f){o[f]=r[f]||''});
+  return o;
+}
+function setSync(cls,text){$('dot').className='dot '+cls;$('syncText').textContent=text}
+
+async function pushTable(table,arr,toRow,save){
+  var dirty=arr.filter(function(x){return x.dirty});
   if(!dirty.length) return 0;
-  var res=await api('/rest/v1/notes',{method:'POST',
+  var res=await api('/rest/v1/'+table,{method:'POST',
     headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
     body:JSON.stringify(dirty.map(toRow))});
-  if(!res.ok) throw new Error('上傳失敗 '+res.status+' '+(await res.text()).slice(0,120));
-  for(var i=0;i<dirty.length;i++){dirty[i].dirty=false;await putNote(dirty[i])}
+  if(!res.ok) throw new Error('上傳失敗 '+res.status+' '+(await res.text()).slice(0,100));
+  for(var i=0;i<dirty.length;i++){dirty[i].dirty=false;await save(dirty[i])}
   return dirty.length;
 }
-async function pull(){
-  var res=await api('/rest/v1/notes?select=*&updated_at=gt.'+encodeURIComponent(lastPull)
+async function pullTable(table,arr,fromRow,save){
+  var mark=pullMark[table]||'1970-01-01T00:00:00Z';
+  var res=await api('/rest/v1/'+table+'?select=*&updated_at=gt.'+encodeURIComponent(mark)
     +'&order=updated_at.asc&limit=500');
-  if(!res.ok) throw new Error('下載失敗 '+res.status+' '+(await res.text()).slice(0,120));
-  var rows=await res.json(),n=0;
+  if(!res.ok) throw new Error('下載失敗 '+res.status+' '+(await res.text()).slice(0,100));
+  var rows=await res.json();
   for(var i=0;i<rows.length;i++){
     var r=rows[i],inc=fromRow(r),cur=null;
-    for(var j=0;j<notes.length;j++) if(notes[j].id===inc.id){cur=notes[j];break}
-    if(cur&&cur.dirty&&cur.updated>=inc.updated) continue;      // 本機較新且尚未上傳 → 保留本機
-    if(cur&&cur.updated>inc.updated) continue;                   // 本機較新 → 保留
-    if(cur){ Object.assign(cur,inc) } else { notes.push(inc) }
-    await putNote(cur||inc); n++;
-    if(r.updated_at>lastPull) lastPull=r.updated_at;
+    for(var j=0;j<arr.length;j++) if(arr[j].id===inc.id){cur=arr[j];break}
+    if(r.updated_at>pullMark[table]) pullMark[table]=r.updated_at;
+    if(cur&&cur.dirty&&cur.updated>=inc.updated) continue;
+    if(cur&&cur.updated>inc.updated) continue;
+    if(cur){Object.assign(cur,inc)} else {arr.push(inc)}
+    await save(cur||inc);
   }
-  if(rows.length) await putMeta('lastPull',lastPull);
-  return n;
+  if(rows.length) await putMeta('pullMark',pullMark);
+  return rows.length;
 }
 async function pullSites(){
   var res=await api('/rest/v1/sites?select=name&order=name.asc');
   if(!res.ok) return;
-  var rows=await res.json();
-  if(!rows.length) return;
+  var rows=await res.json(); if(!rows.length) return;
   var names=rows.map(function(r){return r.name});
-  var changed=names.length!==sites.length||names.some(function(x,i){return x!==sites[i]});
-  if(changed){ sites=names; await putMeta('sites',sites);
-    if(sites.indexOf(pick)<0) pick=sites[0]; renderSites(); }
+  if(names.join('|')!==sites.join('|')){sites=names;await putMeta('sites',sites)}
 }
 async function pushSite(name){
   if(!online()) return;
-  try{ await api('/rest/v1/sites',{method:'POST',
+  try{await api('/rest/v1/sites',{method:'POST',
     headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify([{name:name}])}) }catch(e){}
+    body:JSON.stringify([{name:name}])})}catch(e){}
 }
 async function sync(quiet){
-  if(!online()){ setSync('off','尚未設定共用（資料只存在本機）'); return }
+  if(!online()){setSync('off','尚未設定共用（資料只存在本機）');return}
   if(syncing) return;
-  syncing=true; setSync('busy','同步中…');
+  syncing=true;setSync('busy','同步中…');
   try{
-    await push();
-    await pull();
+    await pushTable('notes',notes,noteRow,putNote);
+    await pushTable('shipments',ships,shipRow,putShipDB);
+    await pullTable('notes',notes,noteFrom,putNote);
+    await pullTable('shipments',ships,shipFrom,putShipDB);
     await pullSites();
     await uploadPending();
     setSync('ok','已同步 · '+p2(new Date().getHours())+':'+p2(new Date().getMinutes())+' · '+me());
@@ -409,14 +539,12 @@ async function sync(quiet){
   }catch(e){
     setSync('err','同步失敗：'+(e.message||'網路異常'));
     if(!quiet) toast('同步失敗，稍後自動重試');
-  }finally{ syncing=false }
+  }finally{syncing=false}
 }
-function scheduleSync(){
-  if(!online()) return;
-  clearTimeout(syncTimer); syncTimer=setTimeout(function(){sync(true)},1500);
-}
+function scheduleSync(){if(!online())return;clearTimeout(syncTimer);
+  syncTimer=setTimeout(function(){sync(true)},1500)}
 
-/* ================= 照片（本機 + 雲端） ================= */
+/* ================= 照片 ================= */
 function shrink(file,max,quality){
   return new Promise(function(res,rej){
     var img=new Image(),u=URL.createObjectURL(file);
@@ -461,49 +589,192 @@ async function upload(p){
       {method:'POST',headers:{'Content-Type':'image/jpeg','x-upsert':'true'},body:pairs[i][1]});
     if(!res.ok&&res.status!==409) throw new Error('照片上傳失敗 '+res.status);
   }
-  p.uploaded=true; await putPhoto(p);
+  p.uploaded=true;await putPhoto(p);
 }
 async function uploadPending(){
   var ps=await allPhotos();
-  for(var i=0;i<ps.length;i++) if(!ps[i].uploaded){ try{ await upload(ps[i]) }catch(e){ break } }
+  for(var i=0;i<ps.length;i++) if(!ps[i].uploaded){try{await upload(ps[i])}catch(e){break}}
 }
 async function ensurePhoto(id){
-  var p=await getPhoto(id);
-  if(p) return p;
+  var p=await getPhoto(id); if(p) return p;
   if(!online()) return null;
   try{
-    // 走帶金鑰的端點，bucket 可維持私有，照片不會被猜網址取走
     var rf=await api('/storage/v1/object/'+BUCKET+'/'+id+'.jpg'),
         rt=await api('/storage/v1/object/'+BUCKET+'/'+id+'_t.jpg');
     if(!rf.ok||!rt.ok) return null;
     var rec={id:id,full:await rf.blob(),thumb:await rt.blob(),created:Date.now(),uploaded:true};
-    await putPhoto(rec); return rec;
-  }catch(e){ return null }
+    await putPhoto(rec);return rec;
+  }catch(e){return null}
 }
 
-/* ================= 渲染 ================= */
-function live(){return notes.filter(function(n){return !n.deleted})}
-function renderSites(){
-  var box=$('siteChips');box.innerHTML='';
-  sites.forEach(function(s){
-    var b=document.createElement('button');
-    b.type='button';b.className='chip'+(s===pick?' on':'');b.textContent=s;
-    if(s===pick){b.style.background=color(s);b.style.borderColor=color(s)}
-    b.onclick=function(){pick=s;renderSites()};
-    box.appendChild(b);
+/* ================= 出貨看板 ================= */
+function shipStage(s){
+  if(s.done) return {k:'ok',t:'已結案'};
+  var t=today();
+  if(s.delivery) return s.delivery<=t?{k:'ok',t:'已派送'}:{k:'go',t:'待派送 '+md(s.delivery)};
+  if(s.customs) return s.customs<=t?{k:'go',t:'清關完成'}:{k:'go',t:'待清關 '+md(s.customs)};
+  if(s.pickup) return s.pickup<=t?{k:'warn',t:'已提貨'}:{k:'go',t:'待提貨 '+md(s.pickup)};
+  return {k:'',t:'備貨中'};
+}
+function shipVisible(){
+  var t=today();
+  return liveShips().filter(function(s){
+    if(shipFilter==='active'&&s.done) return false;
+    if(shipFilter==='done'&&!s.done) return false;
+    if(shipFilter==='week'){
+      var ds=[s.pickup,s.customs,s.delivery].filter(Boolean);
+      if(!ds.length) return false;
+      var lim=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+      if(!ds.some(function(d){return d>=t&&d<=lim})) return false;
+    }
+    if(shipQ){
+      var hay=(s.no+' '+s.customer+' '+s.items+' '+s.address+' '+s.contact).toLowerCase();
+      if(hay.indexOf(shipQ)<0) return false;
+    }
+    return true;
+  }).sort(function(a,b){
+    if(a.done!==b.done) return a.done?1:-1;
+    var ad=a.delivery||a.customs||a.pickup||'9999',bd=b.delivery||b.customs||b.pickup||'9999';
+    if(ad!==bd) return ad<bd?-1:1;
+    return b.created-a.created;
   });
 }
-function stats(){var o=0,dn=0,late=0,now=Date.now();
-  live().forEach(function(n){if(n.done){dn++}else{o++;if(n.due&&n.due<now)late++}});
-  $('statOpen').textContent=o;$('statDone').textContent=dn;
-  var el=$('statLate');el.textContent=late;el.className=late?'hot':'';}
+function renderBoard(){
+  var box=$('shipList');box.innerHTML='';
+  var items=shipVisible();
+  if(!items.length){
+    $('shipEmpty').textContent=liveShips().length
+      ? '這個條件下沒有出貨資料。'
+      : '還沒有出貨資料。\n按上面「＋ 新增出貨」建立第一筆。';
+    return;
+  }
+  $('shipEmpty').textContent='';
+  items.forEach(function(s){
+    var el=document.createElement('div');
+    el.className='ship'+(s.done?' done':'');
+    el.style.setProperty('--c',color(s.customer));
+    var st=shipStage(s);
+    var contactTxt=esc(s.contact);
+    phones(s.contact).forEach(function(p){
+      contactTxt=contactTxt.replace(p,'<a href="tel:'+p.replace(/-/g,'')+'">'+p+'</a>')});
+    function leg(label,d){
+      var cls='leg'+(d?' set':'')+(d&&d<=today()?' past':'');
+      return '<div class="'+cls+'"><span>'+label+'</span>'+md(d)+'</div>';
+    }
+    el.innerHTML=
+      '<div class="top"><span class="cust">'+esc(s.customer||'未填客戶')+'</span>'+
+        (s.no?'<span class="no">'+esc(s.no)+'</span>':'')+
+        '<span class="stage '+st.k+'">'+st.t+'</span></div>'+
+      (s.items?'<div class="items">'+esc(s.items)+'</div>':'')+
+      ((s.dims||s.weight)?'<div class="spec">'+esc(s.dims)+(s.weight?'　'+esc(s.weight):'')+'</div>':'')+
+      ((s.address||s.contact)?'<div class="addr">'+esc(s.address)+(s.contact?'<br>'+contactTxt:'')+'</div>':'')+
+      (s.note?'<div class="addr">📝 '+esc(s.note)+'</div>':'')+
+      '<div class="track">'+leg('提貨',s.pickup)+leg('清關',s.customs)+leg('派送',s.delivery)+'</div>'+
+      '<div class="foot">'+(s.created_by?'<span>@'+esc(s.created_by)+
+        (s.updated_by&&s.updated_by!==s.created_by?' ✎'+esc(s.updated_by):'')+'</span>':'')+
+        (s.dirty&&online()?'<span class="pend">待同步</span>':'')+
+        '<span class="acts"><button data-a="done">'+(s.done?'重啟':'結案')+'</button>'+
+        '<button data-a="edit">編輯</button></span></div>';
+    el.querySelector('[data-a="edit"]').onclick=function(){openShip(s)};
+    el.querySelector('[data-a="done"]').onclick=function(){s.done=!s.done;touchShip(s)};
+    box.appendChild(el);
+  });
+}
+function renderSiteGrid(){
+  var box=$('siteGrid');box.innerHTML='';
+  var now=Date.now();
+  sites.forEach(function(name){
+    var ns=liveNotes().filter(function(n){return n.site===name});
+    var open=ns.filter(function(n){return !n.done}).length;
+    var late=ns.filter(function(n){return !n.done&&n.due&&n.due<now}).length;
+    var sh=liveShips().filter(function(s){return !s.done&&s.customer===name}).length;
+    var b=document.createElement('button');
+    b.type='button';b.className='sitecard';b.style.setProperty('--c',color(name));
+    b.innerHTML='<div class="nm">'+esc(name)+'</div><div class="nums">'+
+      '<span><b>'+open+'</b>待辦</span>'+
+      (late?'<span class="late"><b>'+late+'</b>逾期</span>':'')+
+      (sh?'<span class="shp"><b>'+sh+'</b>在途</span>':'')+'</div>';
+    b.onclick=function(){enterSite(name)};
+    box.appendChild(b);
+  });
+  var dl=$('siteOptions');dl.innerHTML='';
+  sites.forEach(function(n){var o=document.createElement('option');o.value=n;dl.appendChild(o)});
+}
+
+/* ---- 出貨表單 ---- */
+function openShip(s){
+  editingShip=s||null;
+  $('shipFormTitle').textContent=s?'編輯出貨':'新增出貨';
+  $('shipDelete').style.display=s?'':'none';
+  var v={no:'',customer:(view==='site'?curSite:''),items:'',dims:'',weight:'',
+    address:'',contact:'',pickup:'',customs:'',delivery:'',note:''};
+  if(s) SHIP_F.forEach(function(f){v[f]=s[f]||''});
+  $('fNo').value=v.no;$('fCust').value=v.customer;$('fItems').value=v.items;
+  $('fDims').value=v.dims;$('fWeight').value=v.weight;$('fAddr').value=v.address;
+  $('fContact').value=v.contact;$('fPickup').value=v.pickup;$('fCustoms').value=v.customs;
+  $('fDelivery').value=v.delivery;$('fNote').value=v.note;
+  $('shipSheet').classList.add('on');
+}
+$('newShipBtn').onclick=function(){openShip(null)};
+$('shipCancel').onclick=function(){$('shipSheet').classList.remove('on');editingShip=null};
+$('shipSave').onclick=async function(){
+  var v={no:$('fNo').value.trim(),customer:$('fCust').value.trim(),items:$('fItems').value.trim(),
+    dims:$('fDims').value.trim(),weight:$('fWeight').value.trim(),address:$('fAddr').value.trim(),
+    contact:$('fContact').value.trim(),pickup:$('fPickup').value,customs:$('fCustoms').value,
+    delivery:$('fDelivery').value,note:$('fNote').value.trim()};
+  if(!v.customer&&!v.no&&!v.items){toast('至少要填客戶端、單號或項目其中一項');return}
+  var s=editingShip;
+  if(s){SHIP_F.forEach(function(f){s[f]=v[f]})}
+  else{
+    s=Object.assign({id:uid(),done:false,deleted:false,created:Date.now(),
+      created_by:me(),updated_by:me()},v);
+    ships.push(s);
+  }
+  if(v.customer&&sites.indexOf(v.customer)<0){
+    sites.push(v.customer);await putMeta('sites',sites);pushSite(v.customer);
+  }
+  $('shipSheet').classList.remove('on');editingShip=null;
+  touchShip(s);
+};
+$('shipDelete').onclick=async function(){
+  if(!editingShip||!confirm('刪除這筆出貨資料？'+(online()?'\n同事那邊也會消失。':''))) return;
+  var s=editingShip;s.deleted=true;
+  $('shipSheet').classList.remove('on');editingShip=null;
+  if(!online()){await delShipDB(s.id);ships=ships.filter(function(x){return x.id!==s.id});render();return}
+  touchShip(s);
+};
+async function touchShip(s){
+  s.updated=Date.now();s.updated_by=me();s.dirty=true;
+  await putShipDB(s);render();scheduleSync();
+}
+
+/* ================= 站點備忘 ================= */
+function enterSite(name){
+  curSite=name;view='site';filter='open';q='';$('search').value='';
+  syncSeg();render();window.scrollTo(0,0);
+}
+function goHome(){view='home';curSite='';render();window.scrollTo(0,0)}
+$('backBtn').onclick=goHome;
+[].forEach.call($('homeTabs').children,function(b){
+  b.onclick=function(){tab=b.dataset.tab;
+    [].forEach.call($('homeTabs').children,function(x){x.classList.toggle('on',x.dataset.tab===tab)});
+    render()}});
+
+function siteNotes(){return liveNotes().filter(function(n){return n.site===curSite})}
+function stats(){
+  var o=0,late=0,now=Date.now();
+  liveNotes().forEach(function(n){if(!n.done){o++;if(n.due&&n.due<now)late++}});
+  $('statOpen').textContent=o;
+  var el=$('statLate');el.textContent=late;el.className=late?'hot':'';
+  $('statShip').textContent=liveShips().filter(function(s){return !s.done}).length;
+}
 function visible(){
-  return live().filter(function(n){
+  return siteNotes().filter(function(n){
     if(filter==='open'&&n.done)return false;
     if(filter==='done'&&!n.done)return false;
     if(filter==='due'&&(!n.due||n.done))return false;
     if(filter==='mine'&&!(n.created_by===me()||n.updated_by===me()))return false;
-    if(q&&(n.text+' '+n.site+' '+(n.created_by||'')+' '+(n.updated_by||'')).toLowerCase().indexOf(q)<0)return false;
+    if(q&&(n.text+' '+(n.created_by||'')+' '+(n.updated_by||'')).toLowerCase().indexOf(q)<0)return false;
     return true;
   }).sort(function(a,b){
     if(a.done!==b.done)return a.done?1:-1;
@@ -512,13 +783,16 @@ function visible(){
     if(!!a.star!==!!b.star)return a.star?-1:1;
     return b.created-a.created});
 }
-function render(){
-  stats();list.innerHTML='';
+function renderNotes(){
+  var listEl=$('list');listEl.innerHTML='';
   var items=visible(),now=Date.now();
-  if(!items.length){empty.textContent=live().length
-    ?'這個條件下沒有備忘。換個篩選或清空搜尋。'
-    :'還沒有備忘。上面打一行字，按「建立」就記下來。';return}
-  empty.textContent='';
+  if(!items.length){
+    $('empty').textContent=siteNotes().length
+      ? '這個條件下沒有備忘。'
+      : '「'+curSite+'」還沒有備忘。\n上面打一行字，按「建立」就記下來。';
+    return;
+  }
+  $('empty').textContent='';
   items.forEach(function(n){
     var li=document.createElement('li');
     var late=n.due&&!n.done&&n.due<now;
@@ -530,31 +804,30 @@ function render(){
       +(n.updated_by&&n.updated_by!==n.created_by?' ✎'+esc(n.updated_by):'')+'</span>':'';
     li.innerHTML='<button class="check" aria-label="切換完成">'+(n.done?'✓':'')+'</button>'+
       '<div class="body"><div class="text">'+esc(n.text)+'</div>'+
-      '<div class="meta"><span class="site">'+esc(n.site)+'</span><span>'+when(n.created)+'</span>'+who+
+      '<div class="meta"><span>'+when(n.created)+'</span>'+who+
       (n.dirty&&online()?'<span class="pend">待同步</span>':'')+
       (n.due?'<span class="due'+(late?' late':soon?' soon':'')+'">'+dueLabel(n.due)+'</span>':'')+
       (np?'<button class="clip" data-a="toggle">📎 '+np+(opened[n.id]?' ▲':' ▼')+'</button>':'')+
       '<span class="acts"><button data-a="photo">＋照片</button>'+
       '<button data-a="edit">編輯</button><button data-a="del">刪除</button></span></div></div>'+
       '<button class="star'+(n.star?' on':'')+'" aria-label="標記重要">★</button>';
-    li.querySelector('.check').onclick=function(){n.done=!n.done;touch(n)};
-    li.querySelector('.star').onclick=function(){n.star=!n.star;touch(n)};
+    li.querySelector('.check').onclick=function(){n.done=!n.done;touchNote(n)};
+    li.querySelector('.star').onclick=function(){n.star=!n.star;touchNote(n)};
     li.querySelector('[data-a="del"]').onclick=function(){removeNote(n)};
     li.querySelector('[data-a="edit"]').onclick=function(){startEdit(li,n)};
     li.querySelector('[data-a="photo"]').onclick=function(){attachTo=n;$('filePic').click()};
     var tg=li.querySelector('[data-a="toggle"]');
     if(tg) tg.onclick=function(){opened[n.id]=!opened[n.id];render()};
     if(np&&opened[n.id]) shelf(li.querySelector('.body'),n);
-    list.appendChild(li);
+    listEl.appendChild(li);
   });
 }
 async function shelf(body,n){
   var box=document.createElement('div');box.className='shelf';body.appendChild(box);
   for(var i=0;i<n.photos.length;i++){
-    var ph=document.createElement('div');ph.className='loading';ph.textContent='…';
-    box.appendChild(ph);
+    var ph=document.createElement('div');ph.className='loading';ph.textContent='…';box.appendChild(ph);
     var p=await ensurePhoto(n.photos[i]);
-    if(!p){ ph.textContent='讀不到'; continue }
+    if(!p){ph.textContent='讀不到';continue}
     var im=document.createElement('img');
     im.src=objURL(p.id+':t',p.thumb);im.loading='lazy';im.alt='附件照片';
     (function(pid){im.onclick=function(){viewPhoto(pid,n)}})(p.id);
@@ -578,26 +851,24 @@ function startEdit(li,n){
   var no=document.createElement('button');no.textContent='取消';
   acts.appendChild(ok);acts.appendChild(no);row.appendChild(acts);
   body.appendChild(ta);body.appendChild(dt);body.appendChild(row);ta.focus();
-  ok.onclick=function(){
-    var v=ta.value.trim();if(v)n.text=v;
-    n.due=dt.value?new Date(dt.value).getTime():null;
-    touch(n)};
+  ok.onclick=function(){var v=ta.value.trim();if(v)n.text=v;
+    n.due=dt.value?new Date(dt.value).getTime():null;touchNote(n)};
   no.onclick=render;
 }
-async function touch(n){
-  n.updated=Date.now(); n.updated_by=me(); n.dirty=true;
-  await putNote(n); bump(); render(); scheduleSync();
+async function touchNote(n){
+  n.updated=Date.now();n.updated_by=me();n.dirty=true;
+  await putNote(n);render();scheduleSync();
 }
 async function removeNote(n){
   if(!confirm('刪除這則備忘'+((n.photos||[]).length?'和它的 '+n.photos.length+' 張照片':'')+'？'))return;
-  n.deleted=true; delete opened[n.id];
+  n.deleted=true;delete opened[n.id];
   if(!online()){
     for(var i=0;i<(n.photos||[]).length;i++) await delPhoto(n.photos[i]);
     await delNoteDB(n.id);
     notes=notes.filter(function(x){return x.id!==n.id});
-    bump();render();return;
+    render();return;
   }
-  touch(n);
+  touchNote(n);
 }
 
 /* ================= 照片檢視 ================= */
@@ -614,7 +885,7 @@ $('viewerDel').onclick=async function(){
   n.photos=n.photos.filter(function(x){return x!==pid});
   await delPhoto(pid);
   $('viewer').classList.remove('on');viewing=null;
-  touch(n);
+  touchNote(n);
 };
 
 /* ================= 到期日 ================= */
@@ -643,56 +914,63 @@ $('dueInput').addEventListener('change',syncDueBtn);
   };
 });
 
-/* ================= 建立 ================= */
+/* ================= 建立備忘 ================= */
 async function add(){
-  var v=input.value.trim();
+  var v=$('input').value.trim();
   if(!v&&!queue.length)return;
   var due=($('duebox').classList.contains('on')&&$('dueInput').value)
-    ? new Date($('dueInput').value).getTime() : null;
+    ? new Date($('dueInput').value).getTime():null;
   var now=Date.now();
-  var n={id:uid(),text:v||'（照片）',site:pick,done:false,star:false,
+  var n={id:uid(),text:v||'（照片）',site:curSite,done:false,star:false,
     created:now,updated:now,due:due,photos:[],deleted:false,
     created_by:me(),updated_by:me(),dirty:true};
-  for(var i=0;i<queue.length;i++){
-    await putPhoto(queue[i]); n.photos.push(queue[i].id);
-  }
+  for(var i=0;i<queue.length;i++){await putPhoto(queue[i]);n.photos.push(queue[i].id)}
   await putNote(n);notes.push(n);
   queue=[];renderQueue();
-  input.value='';input.style.height='auto';
+  $('input').value='';$('input').style.height='auto';
   $('duebox').classList.remove('on');$('dueInput').value='';syncDueBtn();
   if(filter==='done'){filter='open';syncSeg()}
-  bump();render();scheduleSync();
+  render();scheduleSync();
   if(due) toast('已設定期限：'+dueLabel(due).slice(2));
 }
-function syncSeg(){[].forEach.call(document.querySelectorAll('#statusFilter button'),
+function syncSeg(){[].forEach.call($('statusFilter').children,
   function(b){b.classList.toggle('on',b.dataset.status===filter)})}
+
+/* ================= 總渲染 ================= */
+function render(){
+  stats();
+  var home=view==='home';
+  $('viewHome').classList.toggle('hide',!home);
+  $('viewSite').classList.toggle('hide',home);
+  $('backBtn').classList.toggle('hide',home);
+  $('titleEl').textContent=home?'工作備忘錄':curSite;
+  $('tagEl').textContent=home?'MEMO':'站點';
+  if(home){
+    $('paneBoard').classList.toggle('hide',tab!=='board');
+    $('paneSites').classList.toggle('hide',tab!=='sites');
+    if(tab==='board') renderBoard(); else renderSiteGrid();
+  }else renderNotes();
+  checkBanner();
+}
 
 /* ================= 橫幅 ================= */
 function checkBanner(){
   var b=$('banner'),now=Date.now();
-  var late=live().filter(function(n){return !n.done&&n.due&&n.due<now});
+  var late=liveNotes().filter(function(n){return !n.done&&n.due&&n.due<now});
   if(late.length){
+    var cnt={};late.forEach(function(n){cnt[n.site]=(cnt[n.site]||0)+1});
+    var names=Object.keys(cnt);
     $('bannerTag').textContent='逾期';
-    $('bannerText').textContent='有 '+late.length+' 件已過期限。';
-    $('bannerBtn').textContent='只看有期限';
-    $('bannerBtn').onclick=function(){filter='due';syncSeg();render()};
+    $('bannerText').textContent='有 '+late.length+' 件已過期限（'+names.slice(0,2).join('、')+
+      (names.length>2?' 等':'')+'）。';
+    $('bannerBtn').textContent='去處理';
+    $('bannerBtn').onclick=function(){enterSite(names[0]);filter='due';syncSeg();render()};
     b.classList.add('on');return;
   }
-  if(online()){ b.classList.remove('on'); return }   // 有雲端就不必一直催備份
-  var days=lastBackup?Math.floor((now-lastBackup)/864e5):null;
-  var need=(lastBackup===0&&live().length>=5)||(days!==null&&days>=7)||changes>=40;
-  if(need){
-    $('bannerTag').textContent='提醒';
-    $('bannerText').textContent=lastBackup?'距離上次備份已 '+days+' 天，建議匯出一份。'
-      :'還沒備份過，資料只存在這台裝置。';
-    $('bannerBtn').textContent='立即備份';
-    $('bannerBtn').onclick=function(){$('exportBtn').click()};
-    b.classList.add('on');
-  }else b.classList.remove('on');
+  b.classList.remove('on');
 }
-function bump(){changes++;putMeta('changes',changes);checkBanner()}
 
-/* ================= 設定面板 ================= */
+/* ================= 設定 ================= */
 function openSheet(){
   $('cfgUser').value=cfg.user;$('cfgUrl').value=cfg.url;$('cfgKey').value=cfg.key;
   $('sheet').classList.add('on');
@@ -706,15 +984,15 @@ $('cfgSave').onclick=async function(){
   await putMeta('cfg',cfg);
   $('sheet').classList.remove('on');
   if(online()){
-    // 首次啟用共用：把本機既有備忘全部標記為待上傳
     for(var i=0;i<notes.length;i++){
       if(!notes[i].created_by) notes[i].created_by=me();
       if(!notes[i].updated) notes[i].updated=notes[i].created;
-      notes[i].dirty=true; await putNote(notes[i]);
+      notes[i].dirty=true;await putNote(notes[i]);
     }
+    for(var k=0;k<ships.length;k++){ships[k].dirty=true;await putShipDB(ships[k])}
     for(var j=0;j<sites.length;j++) pushSite(sites[j]);
     sync();
-  }else{ setSync('off','尚未設定共用（資料只存在本機）'); render() }
+  }else{setSync('off','尚未設定共用（資料只存在本機）');render()}
   storageInfo();
 };
 $('cfgClear').onclick=async function(){
@@ -733,13 +1011,12 @@ $('cfgLink').onclick=function(){
   navigator.clipboard.writeText(link).then(function(){toast('連結已複製，傳給同事即可')},
     function(){prompt('複製這個連結給同事：',link)});
 };
-$('syncNow').onclick=function(){ online()?sync():openSheet() };
+$('syncNow').onclick=function(){online()?sync():openSheet()};
 
-/* ================= 儲存空間 ================= */
 async function storageInfo(){
   var txt=online()
     ? '資料同步到 Supabase，同事看到的是同一份；離線時先存本機，恢復連線自動補上。'
-    : '資料只存在這台裝置（IndexedDB）。點右上 ⚙ 可設定與同事共用。';
+    : '資料只存在這台裝置。點右上 ⚙ 可設定與同事共用。';
   try{
     if(navigator.storage&&navigator.storage.estimate){
       var e=await navigator.storage.estimate();
@@ -763,18 +1040,17 @@ $('exportBtn').onclick=async function(){
   toast('打包中…');
   var ps=await allPhotos(),photos=[],skipped=0;
   for(var i=0;i<ps.length;i++){
-    try{ photos.push({id:ps[i].id,full:await blobToDataURL(ps[i].full),thumb:await blobToDataURL(ps[i].thumb)}) }
+    try{photos.push({id:ps[i].id,full:await blobToDataURL(ps[i].full),thumb:await blobToDataURL(ps[i].thumb)})}
     catch(e){skipped++}
   }
-  var data={version:4,exported:Date.now(),sites:sites,notes:notes,photos:photos};
+  var data={version:5,exported:Date.now(),sites:sites,notes:notes,ships:ships,photos:photos};
   var blob=new Blob([JSON.stringify(data)],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='workmemo-'+new Date().toISOString().slice(0,10)+'.json';a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
   toast('備份已下載（'+(blob.size/1048576).toFixed(1)+' MB）');
-  lastBackup=Date.now();changes=0;putMeta('lastBackup',lastBackup);putMeta('changes',0);checkBanner();
   if(skipped) toast('有 '+skipped+' 張照片讀取失敗，未包含在備份內');
- }catch(err){ toast('備份失敗：'+(err&&err.message?err.message:'未知錯誤')) }
+ }catch(err){toast('備份失敗：'+(err&&err.message?err.message:'未知錯誤'))}
 };
 $('importBtn').onclick=function(){$('fileJson').click()};
 $('fileJson').onchange=function(){
@@ -786,20 +1062,23 @@ $('fileJson').onchange=function(){
       if(!d.notes)throw 0;
       if(!confirm('用備份覆蓋本機所有資料？'))return;
       var ns=await allNotes();for(var i=0;i<ns.length;i++) await delNoteDB(ns[i].id);
+      var ss=await allShipsDB();for(var x=0;x<ss.length;x++) await delShipDB(ss[x].id);
       var ps=await allPhotos();for(var j=0;j<ps.length;j++) await delPhoto(ps[j].id);
       for(var k=0;k<(d.photos||[]).length;k++){
         var p=d.photos[k];
-        try{ await putPhoto({id:p.id,full:dataURLToBlob(p.full),thumb:dataURLToBlob(p.thumb),
-          created:Date.now(),uploaded:false}) }catch(e){}
+        try{await putPhoto({id:p.id,full:dataURLToBlob(p.full),thumb:dataURLToBlob(p.thumb),
+          created:Date.now(),uploaded:false})}catch(e){}
       }
       notes=d.notes.map(function(n){
-        n.updated=n.updated||n.created; n.deleted=!!n.deleted;
-        n.created_by=n.created_by||me(); n.updated_by=n.updated_by||me();
-        n.dirty=online(); return n});
+        n.updated=n.updated||n.created;n.deleted=!!n.deleted;
+        n.created_by=n.created_by||me();n.updated_by=n.updated_by||me();
+        n.dirty=online();return n});
       for(var m=0;m<notes.length;m++) await putNote(notes[m]);
+      ships=(d.ships||[]).map(function(s){s.dirty=online();return s});
+      for(var y=0;y<ships.length;y++) await putShipDB(ships[y]);
       sites=(d.sites&&d.sites.length)?d.sites:DEFAULT_SITES.slice();
       await putMeta('sites',sites);
-      pick=sites[0];urls={};opened={};renderSites();render();checkBanner();storageInfo();
+      urls={};opened={};render();storageInfo();
       toast('已還原備份');
       if(online()) sync();
     }catch(e){toast('這個檔案讀不出來，請選 workmemo 備份檔')}
@@ -807,10 +1086,10 @@ $('fileJson').onchange=function(){
   r.readAsText(f);
 };
 
-/* ================= 其他操作 ================= */
+/* ================= 其他 ================= */
 var HAS_KB=window.matchMedia&&window.matchMedia('(pointer:fine)').matches;
-input.addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px'});
-input.addEventListener('keydown',function(e){
+$('input').addEventListener('input',function(){this.style.height='auto';this.style.height=this.scrollHeight+'px'});
+$('input').addEventListener('keydown',function(e){
   if(HAS_KB&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();add()}});
 $('addBtn').onclick=add;
 $('picBtn').onclick=function(){attachTo=null;$('filePic').click()};
@@ -821,36 +1100,38 @@ $('filePic').onchange=async function(){
     var n=attachTo;attachTo=null;
     var before=queue.length;await intake(fs);
     var added=queue.splice(before);
-    for(var i=0;i<added.length;i++){
-      await putPhoto(added[i]);n.photos=(n.photos||[]).concat(added[i].id);
-    }
-    opened[n.id]=true;renderQueue();
-    toast('已附加 '+added.length+' 張照片');
-    touch(n);
-  }else{ await intake(fs);toast('照片已加入，按「建立」存檔'); }
+    for(var i=0;i<added.length;i++){await putPhoto(added[i]);n.photos=(n.photos||[]).concat(added[i].id)}
+    opened[n.id]=true;renderQueue();toast('已附加 '+added.length+' 張照片');
+    touchNote(n);
+  }else{await intake(fs);toast('照片已加入，按「建立」存檔')}
 };
-$('addSiteBtn').onclick=function(){
+$('addSiteBtn').onclick=async function(){
   var name=prompt('新增站點名稱');if(!name)return;name=name.trim();if(!name)return;
   if(sites.indexOf(name)<0)sites.push(name);
-  pick=name;putMeta('sites',sites);renderSites();pushSite(name)};
+  await putMeta('sites',sites);pushSite(name);render()};
 $('search').addEventListener('input',function(){q=this.value.trim().toLowerCase();render()});
-[].forEach.call(document.querySelectorAll('#statusFilter button'),function(b){
+$('shipSearch').addEventListener('input',function(){shipQ=this.value.trim().toLowerCase();render()});
+[].forEach.call($('statusFilter').children,function(b){
   b.onclick=function(){filter=b.dataset.status;syncSeg();render()}});
+[].forEach.call($('shipFilter').children,function(b){
+  b.onclick=function(){shipFilter=b.dataset.sf;
+    [].forEach.call($('shipFilter').children,function(x){x.classList.toggle('on',x.dataset.sf===shipFilter)});
+    render()}});
 $('copyBtn').onclick=function(){
-  var open=live().filter(function(n){return !n.done});
-  if(!open.length){toast('目前沒有待辦');return}
-  var txt=open.map(function(n){return '・['+n.site+'] '+n.text+
+  var open=siteNotes().filter(function(n){return !n.done});
+  if(!open.length){toast('這站沒有待辦');return}
+  var txt='【'+curSite+'】\n'+open.map(function(n){return '・'+n.text+
     (n.due?'（'+dueLabel(n.due).slice(2)+'）':'')+
     (n.created_by?'（'+n.created_by+'）':'')+
     ((n.photos||[]).length?'（附 '+n.photos.length+' 張照片）':'')}).join('\n');
   if(navigator.share){navigator.share({text:txt}).catch(function(){});return}
-  navigator.clipboard.writeText(txt).then(function(){toast('已複製待辦清單')},
+  navigator.clipboard.writeText(txt).then(function(){toast('已複製')},
     function(){prompt('手動複製：',txt)});
 };
 $('clearBtn').onclick=async function(){
-  var done=live().filter(function(n){return n.done});
+  var done=siteNotes().filter(function(n){return n.done});
   if(!done.length){toast('沒有已完成的項目');return}
-  if(!confirm('刪除 '+done.length+' 則已完成的備忘（含其照片）？'+(online()?'\n同事那邊也會一起消失。':'')))return;
+  if(!confirm('刪除「'+curSite+'」的 '+done.length+' 則已完成備忘？'+(online()?'\n同事那邊也會消失。':'')))return;
   for(var i=0;i<done.length;i++){
     if(online()){
       done[i].deleted=true;done[i].updated=Date.now();done[i].updated_by=me();done[i].dirty=true;
@@ -858,46 +1139,44 @@ $('clearBtn').onclick=async function(){
     }else{
       for(var j=0;j<(done[i].photos||[]).length;j++) await delPhoto(done[i].photos[j]);
       await delNoteDB(done[i].id);
-      notes=notes.filter(function(n){return n.id!==done[i].id});
+      var gone=done[i].id;
+      notes=notes.filter(function(n){return n.id!==gone});
     }
   }
-  bump();render();scheduleSync();
+  render();scheduleSync();
 };
 
 /* ================= 啟動 ================= */
 (async function boot(){
-  try{ await openDB(); }
-  catch(e){ $('empty').textContent='這台裝置不允許本機資料庫，請關閉無痕模式再試。';return; }
+  try{await openDB()}
+  catch(e){$('shipEmpty').textContent='這台裝置不允許本機資料庫，請關閉無痕模式再試。';return}
   notes=await allNotes();
+  ships=await allShipsDB();
   var s=await getMeta('sites');if(s&&s.length)sites=s;
-  lastBackup=(await getMeta('lastBackup'))||0;
-  changes=(await getMeta('changes'))||0;
-  lastPull=(await getMeta('lastPull'))||lastPull;
+  var pm=await getMeta('pullMark');if(pm)pullMark=Object.assign(pullMark,pm);
+  var oldMark=await getMeta('lastPull');
+  if(oldMark&&pullMark.notes==='1970-01-01T00:00:00Z') pullMark.notes=oldMark;
   cfg=(await getMeta('cfg'))||cfg;
 
-  // 從同事寄來的連結帶入設定
   var m=/#cfg=([^&]+)/.exec(location.hash||'');
   if(m){
     try{
       var inc=JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-      if(inc.url&&inc.key){ cfg.url=inc.url;cfg.key=inc.key;await putMeta('cfg',cfg) }
+      if(inc.url&&inc.key){cfg.url=inc.url;cfg.key=inc.key;await putMeta('cfg',cfg)}
     }catch(e){}
     history.replaceState(null,'',location.pathname);
   }
+  liveNotes().forEach(function(n){if(n.site&&sites.indexOf(n.site)<0) sites.push(n.site)});
 
-  pick=sites[0];syncDueBtn();
-  renderSites();render();checkBanner();storageInfo();
-
+  syncDueBtn();render();storageInfo();
   if(online()){
-    if(!cfg.user){ openSheet(); toast('請先輸入你的名字') }
+    if(!cfg.user){openSheet();toast('請先輸入你的名字')}
     sync(true);
     setInterval(function(){sync(true)},20000);
     document.addEventListener('visibilitychange',function(){
       if(document.visibilityState==='visible') sync(true)});
     window.addEventListener('online',function(){sync(true)});
-  }else{
-    setSync('off','尚未設定共用（資料只存在本機）');
-  }
+  }else setSync('off','尚未設定共用（資料只存在本機）');
   setInterval(function(){stats();checkBanner()},60000);
   if('serviceWorker' in navigator&&location.protocol!=='file:')
     navigator.serviceWorker.register('sw.js').catch(function(){});
