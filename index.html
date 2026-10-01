@@ -248,6 +248,21 @@
   .movesel select{position:absolute;inset:0;opacity:0;width:100%;font-size:16px}
   mark{background:rgba(255,161,74,.35);color:inherit;border-radius:2px}
   .tabs button{padding:13px 2px;font-size:13.5px}
+  /* ---- 出貨看板 v7 ---- */
+  .ship .seq{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--muted);
+    border-radius:4px;padding:1px 6px;font-weight:600}
+  .ship .mode{font-size:11px;border:1px solid var(--c);color:var(--c);border-radius:4px;padding:0 5px}
+  .ship .track{flex-wrap:nowrap}
+  .ship .leg{min-width:0;font-size:10.5px}
+  .ship .leg b{font-weight:400;color:var(--amber);font-size:10px}
+  .ship .ref{font-family:var(--mono);font-size:11.5px;color:var(--coolant);margin-top:5px;word-break:break-all}
+  .toolrow{display:flex;gap:8px;margin:-2px 0 4px}
+  .toolrow button{flex:1}
+  .fsec{font-size:12px;color:var(--coolant);margin:14px 0 8px;border-top:1px dashed var(--line);padding-top:10px}
+  .row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .row3 .field input,.row3 .field select{padding:9px 6px;font-size:14px}
+  @media (max-width:420px){.row3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .imp-info{font-size:12.5px;color:var(--muted);line-height:1.7;white-space:pre-line}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -286,8 +301,12 @@
 
     <section id="paneBoard">
       <button class="primary wide" id="newShipBtn" type="button">＋ 新增出貨</button>
+      <div class="toolrow">
+        <button class="ghost" id="impBtn" type="button">📥 從 Excel 貼上</button>
+        <button class="ghost" id="expBtn" type="button">📤 匯出 Excel</button>
+      </div>
       <div class="filters">
-        <input id="shipSearch" type="search" placeholder="搜尋單號、客戶、項目" />
+        <input id="shipSearch" type="search" placeholder="搜尋序號、單號、客戶、項目、主號、地點" />
         <div class="segmented" id="shipFilter">
           <button class="on" data-sf="active" type="button">進行中</button>
           <button data-sf="week" type="button">近七天</button>
@@ -397,32 +416,63 @@
   <div class="sheetbox">
     <h2 id="shipFormTitle">新增出貨</h2>
     <div class="row2">
-      <div class="field"><label for="fNo">單號</label><input id="fNo" placeholder="LCS2026040801-02" /></div>
-      <div class="field"><label for="fCust">客戶端／站點</label>
-        <input id="fCust" list="siteOptions" placeholder="智邦 竹北" /><datalist id="siteOptions"></datalist></div>
+      <div class="field" style="flex:0 1 90px"><label for="fSeq">序</label><input id="fSeq" inputmode="numeric" placeholder="95" /></div>
+      <div class="field"><label for="fNo">單號</label><textarea id="fNo" rows="1" placeholder="LCS2026040801-02（多張單號可換行）"></textarea></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="fCust">客戶端</label>
+        <input id="fCust" list="siteOptions" placeholder="智邦" /><datalist id="siteOptions"></datalist></div>
+      <div class="field" style="flex:0 1 120px"><label for="fMode">運輸</label>
+        <select id="fMode"><option value="海">海運</option><option value="空">空運</option><option value="">未定</option></select></div>
     </div>
     <div class="field"><label for="fItems">項目／數量</label>
-      <textarea id="fItems" placeholder="冷板*26套"></textarea></div>
+      <textarea id="fItems" placeholder="注液+烘乾+保壓&#10;CDU*3+小車*3"></textarea></div>
     <div class="row2">
-      <div class="field"><label for="fDims">材積尺寸</label>
-        <textarea id="fDims" placeholder="1200*800*726mm"></textarea></div>
-      <div class="field"><label for="fWeight">重量</label><input id="fWeight" placeholder="151.28KG" /></div>
+      <div class="field"><label for="fDims">材積尺寸／mm</label>
+        <textarea id="fDims" placeholder="1440*1040*2170&#10;1472*952*2132"></textarea></div>
+      <div class="field" style="flex:0 1 130px"><label for="fWeight">重量</label><input id="fWeight" placeholder="1510KG" /></div>
     </div>
     <div class="field"><label for="fAddr">地點</label>
-      <textarea id="fAddr" placeholder="竹北市智慧一路1號"></textarea></div>
+      <textarea id="fAddr" placeholder="竹北市智慧一路一號"></textarea></div>
     <div class="field"><label for="fContact">聯絡人／電話</label>
-      <input id="fContact" placeholder="范聖央 0919968960" />
-      <small>填了電話，卡片上會出現可直接撥號的連結。</small></div>
-    <div class="row2">
+      <textarea id="fContact" rows="1" placeholder="李明學 0975323066 / 范聖央 0919968960"></textarea>
+      <small>地點或聯絡人裡的電話，卡片上都可以直接點撥。</small></div>
+
+    <div class="fsec">時程</div>
+    <div class="row3">
       <div class="field"><label for="fPickup">提貨時間</label><input type="date" id="fPickup" /></div>
+      <div class="field" id="fCutoffBox"><label for="fCutoff">截關時間</label><input type="date" id="fCutoff" /></div>
+      <div class="field"><label for="fDepart" id="lblDepart">航班時間</label><input type="date" id="fDepart" /></div>
+      <div class="field"><label for="fArrive" id="lblArrive">靠岸時間</label><input type="date" id="fArrive" /></div>
       <div class="field"><label for="fCustoms">清關</label><input type="date" id="fCustoms" /></div>
       <div class="field"><label for="fDelivery">派送時間</label><input type="date" id="fDelivery" /></div>
+      <div class="field"><label for="fDelTag">派送日期是</label>
+        <select id="fDelTag"><option value="">確定</option><option value="暫定">暫定</option><option value="前">最晚（之前）</option></select></div>
     </div>
-    <div class="field"><label for="fNote">備註</label><textarea id="fNote"></textarea></div>
+
+    <div class="fsec">單據</div>
+    <div class="row2">
+      <div class="field"><label for="fMawb">主號／提單號</label><input id="fMawb" placeholder="695-57506912" /></div>
+      <div class="field"><label for="fFlight">航班／船名</label><input id="fFlight" placeholder="BR6328" /></div>
+    </div>
+    <div class="field"><label for="fNote">備註</label><textarea id="fNote" placeholder="神云+赛马(先派)／如果沒簽約就轉稼動"></textarea></div>
     <div class="sheetfoot">
       <button class="primary" id="shipSave" type="button">儲存</button>
       <button class="ghost" id="shipCancel" type="button">取消</button>
       <button class="ghost" id="shipDelete" type="button">刪除這筆</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="impSheet">
+  <div class="sheetbox">
+    <h2>從 Excel 貼上出貨資料</h2>
+    <p>在 Excel 選取要匯入的範圍，<b>連同標題列</b>（序、單號、客戶端、地點、運、項目/數量、材積尺寸、提貨時間…備註）一起複製，貼到下面。<br>單號＋客戶端相同的會「更新」，不會重複建立。</p>
+    <div class="field"><textarea id="impText" rows="8" placeholder="在這裡貼上（Ctrl+V／長按貼上）"></textarea></div>
+    <p class="imp-info" id="impInfo"></p>
+    <div class="sheetfoot">
+      <button class="primary" id="impGo" type="button" disabled>匯入</button>
+      <button class="ghost" id="impCancel" type="button">取消</button>
     </div>
   </div>
 </div>
@@ -590,12 +640,20 @@ function dayStr(offset){var d=new Date();d.setDate(d.getDate()+(offset||0));
   return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
 function dayDiff(a,b){return Math.round((Date.parse(a+'T00:00:00Z')-Date.parse(b+'T00:00:00Z'))/864e5)}
 function telLinks(txt){var h=esc(txt);
-  phones(txt).forEach(function(p){h=h.replace(p,'<a href="tel:'+p.replace(/-/g,'')+'">'+p+'</a>')});return h}
+  phones(txt).forEach(function(p){h=h.replace(p,'<a href="'+telHref(p)+'">'+p+'</a>')});return h}
 function share(txt){
   if(navigator.share){navigator.share({text:txt}).catch(function(){});return}
   navigator.clipboard.writeText(txt).then(function(){toast('已複製')},function(){prompt('手動複製：',txt)});
 }
-function phones(txt){return (String(txt||'').match(/0\d{1,3}-?\d{3}-?\d{3,4}/g)||[])}
+/* 抓電話：0 開頭、9~12 碼，可含 - 與 #分機；前面緊貼數字的不算（避免從單號 LCS2026… 中間抓），
+   但前面是英文字可以（實際資料有「or03-5770270#2979」這種寫法） */
+function phones(txt){
+  var re=/(^|[^\d])((?:\+886[- ]?|0)\d[\d-]{6,12}\d(?:#\d+)?)/g,m,out=[];
+  txt=String(txt||'');
+  while((m=re.exec(txt))){var d=m[2].replace(/#.*/,'').replace(/\D/g,'');if(d.length>=9&&d.length<=12)out.push(m[2])}
+  return out;
+}
+function telHref(p){return 'tel:'+p.replace('#',',').replace(/[^\d+,]/g,'')}
 
 /* ================= Supabase REST ================= */
 function api(path,opts){
@@ -617,8 +675,9 @@ function noteFrom(r){
     deleted:!!r.deleted,created_by:r.created_by||'',updated_by:r.updated_by||'',
     photos:r.photos||[],dirty:false};
 }
-var SHIP_F=['no','customer','items','dims','weight','address','contact','pickup','customs','delivery','note'];
-var SHIP_D=['pickup','customs','delivery'];
+var SHIP_F=['seq','no','customer','mode','items','dims','weight','address','contact',
+  'pickup','cutoff','depart','arrive','customs','delivery','deltag','mawb','flight','note'];
+var SHIP_D=['pickup','cutoff','depart','arrive','customs','delivery'];
 function shipRow(s){
   var o={id:s.id,done:!!s.done,deleted:!!s.deleted,
     created_at:new Date(s.created).toISOString(),
@@ -852,35 +911,63 @@ async function ensurePhoto(id){
 }
 
 /* ================= 出貨看板 ================= */
+/* 出貨流程節點：海運有截關、開航／靠岸；空運是航班／抵達 */
+function shipLegs(s){
+  var air=s.mode==='空';
+  var L=[{k:'pickup',t:'提貨',done:'已提貨',wait:'待提貨'}];
+  if(!air) L.push({k:'cutoff',t:'截關',done:'已截關',wait:'待截關'});
+  L.push({k:'depart',t:air?'航班':'開航',done:air?'已起飛':'已開航',wait:air?'待起飛':'待開航'});
+  L.push({k:'arrive',t:air?'抵達':'靠岸',done:air?'已抵達':'已靠岸',wait:air?'待抵達':'待靠岸'});
+  L.push({k:'customs',t:'清關',done:'清關完成',wait:'待清關'});
+  L.push({k:'delivery',t:'派送',done:'已派送',wait:'待派送'});
+  return L;
+}
+function delLabel(s){return s.delivery?md(s.delivery)+(s.deltag==='暫定'?' 暫定':s.deltag==='前'?' 前':''):'—'}
+/* 狀態：找出「最後一個已過的節點」與「下一個有日期的節點」
+   派送日若是「暫定」，日子到了也不算已派送；若是「之前」且已過期未結案 → 標紅 */
 function shipStage(s){
   if(s.done) return {k:'ok',t:'已結案'};
-  var t=today();
-  if(s.delivery) return s.delivery<=t?{k:'ok',t:'已派送'}:{k:'go',t:'待派送 '+md(s.delivery)};
-  if(s.customs) return s.customs<=t?{k:'go',t:'清關完成'}:{k:'go',t:'待清關 '+md(s.customs)};
-  if(s.pickup) return s.pickup<=t?{k:'warn',t:'已提貨'}:{k:'go',t:'待提貨 '+md(s.pickup)};
+  var t=today(),L=shipLegs(s),last=-1,next=null;
+  L.forEach(function(l,i){
+    var d=s[l.k];if(!d) return;
+    if(l.k==='delivery'&&s.deltag) return;          // 暫定／之前：不當成已完成
+    if(d<=t) last=i;
+  });
+  for(var i=last+1;i<L.length;i++) if(s[L[i].k]){next=L[i];break}
+  if(last===L.length-1) return {k:'ok',t:'已派送'};
+  if(next&&next.k==='delivery'&&s.deltag){
+    if(s.deltag==='前') return s.delivery<t?{k:'late',t:'超過派送期限 '+md(s.delivery)}
+      :{k:'warn',t:'派送 '+md(s.delivery)+' 前'};
+    return {k:'warn',t:'派送 '+md(s.delivery)+' 暫定'};
+  }
+  if(next) return {k:'go',t:next.wait+' '+md(s[next.k])};
+  if(last>=0) return {k:'go',t:L[last].done};
   return {k:'',t:'備貨中'};
 }
+function shipDates(s){return SHIP_D.map(function(k){return s[k]}).filter(Boolean)}
 function shipVisible(){
   var t=today();
   return liveShips().filter(function(s){
     if(shipFilter==='active'&&s.done) return false;
     if(shipFilter==='done'&&!s.done) return false;
     if(shipFilter==='week'){
-      var ds=[s.pickup,s.customs,s.delivery].filter(Boolean);
-      if(!ds.length) return false;
-      var lim=dayStr(7);
+      var ds=shipDates(s),lim=dayStr(7);
       if(!ds.some(function(d){return d>=t&&d<=lim})) return false;
     }
     if(shipQ){
-      var hay=(s.no+' '+s.customer+' '+s.items+' '+s.address+' '+s.contact).toLowerCase();
+      var hay=[s.seq,s.no,s.customer,s.items,s.address,s.contact,s.mawb,s.flight,s.note,s.dims]
+        .join(' ').toLowerCase();
       if(hay.indexOf(shipQ)<0) return false;
     }
     return true;
   }).sort(function(a,b){
     if(a.done!==b.done) return a.done?1:-1;
-    var ad=a.delivery||a.customs||a.pickup||'9999',bd=b.delivery||b.customs||b.pickup||'9999';
+    // 依「下一個要發生的日期」排；都過了就用最後一個日期
+    function key(s){var ds=shipDates(s).sort(),up=ds.filter(function(d){return d>=t});
+      return up[0]||ds[ds.length-1]||'9999'}
+    var ad=key(a),bd=key(b);
     if(ad!==bd) return ad<bd?-1:1;
-    return b.created-a.created;
+    return (+b.seq||0)-(+a.seq||0)||b.created-a.created;
   });
 }
 function renderBoard(){
@@ -889,40 +976,57 @@ function renderBoard(){
   if(!items.length){
     $('shipEmpty').textContent=liveShips().length
       ? '這個條件下沒有出貨資料。'
-      : '還沒有出貨資料。\n按上面「＋ 新增出貨」建立第一筆。';
+      : '還沒有出貨資料。\n按「＋ 新增出貨」，或用「從 Excel 貼上」一次匯入。';
     return;
   }
   $('shipEmpty').textContent='';
+  var t=today();
   items.forEach(function(s){
-    var el=document.createElement('div');
-    el.className='ship'+(s.done?' done':'');
+    var el=document.createElement('div'),st=shipStage(s);
+    el.className='ship'+(s.done?' done':'')+(st.k==='late'?' late':'');
     el.style.setProperty('--c',color(s.customer));
-    var st=shipStage(s);
-    var contactTxt=esc(s.contact);
-    phones(s.contact).forEach(function(p){
-      contactTxt=contactTxt.replace(p,'<a href="tel:'+p.replace(/-/g,'')+'">'+p+'</a>')});
-    function leg(label,d){
-      var cls='leg'+(d?' set':'')+(d&&d<=today()?' past':'');
-      return '<div class="'+cls+'"><span>'+label+'</span>'+md(d)+'</div>';
-    }
+    // 節點：提貨、派送一定顯示；中間的有填才顯示，避免手機上擠成一團
+    var legs=shipLegs(s).filter(function(l){return l.k==='pickup'||l.k==='delivery'||s[l.k]});
+    var track=legs.map(function(l){
+      var d=s[l.k],past=d&&d<=t&&!(l.k==='delivery'&&s.deltag);
+      return '<div class="leg'+(d?' set':'')+(past?' past':'')+'"><span>'+l.t+'</span>'+
+        (l.k==='delivery'?(d?md(d)+(s.deltag?'<b> '+(s.deltag==='前'?'前':'暫定')+'</b>':''):'—'):md(d))+'</div>';
+    }).join('');
+    var refs=[s.mawb?'主號 '+esc(s.mawb):'',s.flight?esc(s.flight):''].filter(Boolean).join('　');
     el.innerHTML=
-      '<div class="top"><span class="cust">'+esc(s.customer||'未填客戶')+'</span>'+
-        (s.no?'<span class="no">'+esc(s.no)+'</span>':'')+
+      '<div class="top">'+(s.seq?'<span class="seq">'+esc(s.seq)+'</span>':'')+
+        '<span class="cust">'+esc(s.customer||'未填客戶')+'</span>'+
+        (s.mode?'<span class="mode">'+esc(s.mode)+'</span>':'')+
         '<span class="stage '+st.k+'">'+st.t+'</span></div>'+
+      (s.no?'<div class="spec">'+esc(s.no)+'</div>':'')+
       (s.items?'<div class="items">'+esc(s.items)+'</div>':'')+
-      ((s.dims||s.weight)?'<div class="spec">'+esc(s.dims)+(s.weight?'　'+esc(s.weight):'')+'</div>':'')+
-      ((s.address||s.contact)?'<div class="addr">'+esc(s.address)+(s.contact?'<br>'+contactTxt:'')+'</div>':'')+
-      (s.note?'<div class="addr">📝 '+esc(s.note)+'</div>':'')+
-      '<div class="track">'+leg('提貨',s.pickup)+leg('清關',s.customs)+leg('派送',s.delivery)+'</div>'+
+      ((s.dims||s.weight)?'<div class="spec">'+esc(s.dims)+(s.weight?'\n'+esc(s.weight):'')+'</div>':'')+
+      ((s.address||s.contact)?'<div class="addr">'+telLinks(s.address).replace(/\n/g,'<br>')+
+        (s.contact?(s.address?'<br>':'')+telLinks(s.contact).replace(/\n/g,'<br>'):'')+'</div>':'')+
+      (refs?'<div class="ref">'+refs+'</div>':'')+
+      (s.note?'<div class="addr">📝 '+esc(s.note).replace(/\n/g,'<br>')+'</div>':'')+
+      '<div class="track">'+track+'</div>'+
       '<div class="foot">'+(s.created_by?'<span>@'+esc(s.created_by)+
         (s.updated_by&&s.updated_by!==s.created_by?' ✎'+esc(s.updated_by):'')+'</span>':'')+
         (s.dirty&&online()?'<span class="pend">待同步</span>':'')+
         '<span class="acts"><button data-a="done">'+(s.done?'重啟':'結案')+'</button>'+
-        '<button data-a="edit">編輯</button></span></div>';
+        '<button data-a="share">分享</button><button data-a="edit">編輯</button></span></div>';
     el.querySelector('[data-a="edit"]').onclick=function(){openShip(s)};
+    el.querySelector('[data-a="share"]').onclick=function(){share(shipText(s))};
     el.querySelector('[data-a="done"]').onclick=function(){s.done=!s.done;touchShip(s)};
     box.appendChild(el);
   });
+}
+function shipText(s){
+  var L=shipLegs(s).filter(function(l){return s[l.k]});
+  return '【出貨】'+(s.seq?'#'+s.seq+' ':'')+(s.customer||'')+(s.mode?'（'+s.mode+'運）':'')+'\n'+
+    (s.no?'單號：'+s.no.replace(/\n/g,'、')+'\n':'')+
+    (s.items?'項目：'+s.items+'\n':'')+
+    (s.dims?'材積：'+s.dims+(s.weight?'　'+s.weight:'')+'\n':(s.weight?'重量：'+s.weight+'\n':''))+
+    (s.address?'地點：'+s.address+'\n':'')+(s.contact?'聯絡：'+s.contact+'\n':'')+
+    (L.length?L.map(function(l){return l.t+' '+(l.k==='delivery'?delLabel(s):md(s[l.k]))}).join('｜')+'\n':'')+
+    (s.mawb?'主號：'+s.mawb+'\n':'')+(s.flight?'航班：'+s.flight+'\n':'')+
+    (s.note?'備註：'+s.note:'');
 }
 function renderSiteGrid(){
   var box=$('siteGrid');box.innerHTML='';box.className='grid'+(manageMode?' manage':'');
@@ -981,27 +1085,38 @@ $('manageBtn').onclick=function(){
 };
 
 /* ---- 出貨表單 ---- */
+var SHIP_IN={seq:'fSeq',no:'fNo',customer:'fCust',mode:'fMode',items:'fItems',dims:'fDims',weight:'fWeight',
+  address:'fAddr',contact:'fContact',pickup:'fPickup',cutoff:'fCutoff',depart:'fDepart',arrive:'fArrive',
+  customs:'fCustoms',delivery:'fDelivery',deltag:'fDelTag',mawb:'fMawb',flight:'fFlight',note:'fNote'};
+function nextSeq(){var m=0;liveShips().forEach(function(s){var n=parseInt(s.seq,10);if(n>m)m=n});return m?String(m+1):''}
+function syncModeUI(){
+  var air=$('fMode').value==='空';
+  $('fCutoffBox').classList.toggle('hide',air);
+  $('lblDepart').textContent=air?'航班時間':'開航（航班）';
+  $('lblArrive').textContent=air?'抵達時間':'靠岸時間';
+}
+$('fMode').addEventListener('change',syncModeUI);
 function openShip(s){
   editingShip=s||null;
   $('shipFormTitle').textContent=s?'編輯出貨':'新增出貨';
   $('shipDelete').style.display=s?'':'none';
-  var v={no:'',customer:(view==='site'?curSite:''),items:'',dims:'',weight:'',
-    address:'',contact:'',pickup:'',customs:'',delivery:'',note:''};
+  var v={};SHIP_F.forEach(function(f){v[f]=''});
+  v.mode='海';v.seq=nextSeq();v.customer=(view==='site'?curSite:'');
   if(s) SHIP_F.forEach(function(f){v[f]=s[f]||''});
-  $('fNo').value=v.no;$('fCust').value=v.customer;$('fItems').value=v.items;
-  $('fDims').value=v.dims;$('fWeight').value=v.weight;$('fAddr').value=v.address;
-  $('fContact').value=v.contact;$('fPickup').value=v.pickup;$('fCustoms').value=v.customs;
-  $('fDelivery').value=v.delivery;$('fNote').value=v.note;
+  Object.keys(SHIP_IN).forEach(function(f){$(SHIP_IN[f]).value=v[f]||''});
+  if(s&&!s.mode) $('fMode').value='';
+  syncModeUI();
   $('shipSheet').classList.add('on');
 }
 $('newShipBtn').onclick=function(){openShip(null)};
 $('shipCancel').onclick=function(){$('shipSheet').classList.remove('on');editingShip=null};
 $('shipSave').onclick=async function(){
-  var v={no:$('fNo').value.trim(),customer:$('fCust').value.trim(),items:$('fItems').value.trim(),
-    dims:$('fDims').value.trim(),weight:$('fWeight').value.trim(),address:$('fAddr').value.trim(),
-    contact:$('fContact').value.trim(),pickup:$('fPickup').value,customs:$('fCustoms').value,
-    delivery:$('fDelivery').value,note:$('fNote').value.trim()};
+  var v={};Object.keys(SHIP_IN).forEach(function(f){var x=$(SHIP_IN[f]).value;v[f]=typeof x==='string'?x.trim():x});
+  if(v.mode==='空') v.cutoff='';                      // 空運沒有截關，避免殘留舊值
+  if(!v.delivery) v.deltag='';
   if(!v.customer&&!v.no&&!v.items){toast('至少要填客戶端、單號或項目其中一項');return}
+  // 實務上截關可能早於提貨、清關可能早於航班，只擋明顯填反的：派送早於提貨
+  if(v.pickup&&v.delivery&&v.delivery<v.pickup&&!confirm('派送日期比提貨日期早，確定嗎？')) return;
   var s=editingShip;
   if(s){SHIP_F.forEach(function(f){s[f]=v[f]})}
   else{
@@ -1026,6 +1141,136 @@ async function touchShip(s){
   s.updated=Date.now();s.updated_by=me();s.dirty=true;
   await putShipDB(s);render();scheduleSync();
 }
+
+/* ================= Excel 匯入／匯出 ================= */
+/* 解析 Excel 複製出來的 TSV：儲存格內有換行時 Excel 會用雙引號包起來 */
+function parseTSV(t){
+  var rows=[],row=[],f='',q=false;
+  t=String(t||'').replace(/\r\n?/g,'\n');
+  for(var i=0;i<t.length;i++){
+    var c=t[i];
+    if(q){
+      if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}
+      else f+=c;
+    }else if(c==='"'&&f===''){q=true}
+    else if(c==='\t'){row.push(f);f=''}
+    else if(c==='\n'){row.push(f);rows.push(row);row=[];f=''}
+    else f+=c;
+  }
+  if(f!==''||row.length){row.push(f);rows.push(row)}
+  return rows.filter(function(r){return r.some(function(x){return x.trim()})});
+}
+/* 標題對應：順序有意義（「航班號」要比「航班」先判斷） */
+var IMP_MAP=[[/^序|^no\.?$|^#$/i,'seq'],[/單號|訂單|^po/i,'no'],[/客戶/,'customer'],[/地點|地址/,'address'],
+  [/聯絡|電話/,'contact'],[/^運|運輸|海.?空/,'mode'],[/項目|品名|數量/,'items'],[/材積|尺寸/,'dims'],
+  [/重量|kg/i,'weight'],[/提貨/,'pickup'],[/截關/,'cutoff'],[/航班號|船名|班次/,'flight'],
+  [/航班|開航|起飛|開船/,'depart'],[/靠岸|抵達|到港/,'arrive'],[/清關/,'customs'],[/派送|送達/,'delivery'],
+  [/主號|提單|mawb|awb/i,'mawb'],[/備註|說明|note/i,'note']];
+function headerField(h){h=String(h||'').trim();
+  for(var i=0;i<IMP_MAP.length;i++) if(IMP_MAP[i][0].test(h)) return IMP_MAP[i][1];
+  return null}
+/* 日期：2026/9/22、2026-09-22、9/22（補今年）；附帶「暫定」「前」標記 */
+function parseDay(str){
+  str=String(str||'').trim();if(!str) return {d:'',tag:'',rest:''};
+  var tag=/暫定/.test(str)?'暫定':/前/.test(str)?'前':'',y,m,d,x;
+  if((x=/(\d{4})\s*[\/\-.年]\s*(\d{1,2})\s*[\/\-.月]\s*(\d{1,2})/.exec(str))){y=+x[1];m=+x[2];d=+x[3]}
+  else if((x=/(\d{1,2})\s*[\/月]\s*(\d{1,2})/.exec(str))){y=new Date().getFullYear();m=+x[1];d=+x[2]}
+  else return {d:'',tag:'',rest:str};
+  if(m<1||m>12||d<1||d>31) return {d:'',tag:'',rest:str};
+  return {d:y+'-'+p2(m)+'-'+p2(d),tag:tag,rest:''};
+}
+/* 把貼上的表格轉成出貨物件陣列；回傳 {list, cols, err} */
+function readImport(text){
+  var rows=parseTSV(text);
+  if(!rows.length) return {err:'還沒有貼上資料'};
+  var hi=-1,cols=null;
+  for(var r=0;r<Math.min(rows.length,5);r++){
+    var c=rows[r].map(headerField);
+    if(c.filter(Boolean).length>=3){hi=r;cols=c;break}
+  }
+  if(hi<0) return {err:'找不到標題列，請連「序、單號、客戶端…」那一列一起複製'};
+  // 最後一欄沒有標題（你的表格備註欄就是這樣）→ 當成備註
+  for(var k=cols.length-1;k>=0;k--){if(!cols[k]&&cols.indexOf('note')<0){cols[k]='note'}break}
+  var list=[];
+  rows.slice(hi+1).forEach(function(row){
+    var o={},extra=[];
+    cols.forEach(function(f,i){
+      var v=(row[i]||'').trim();if(!f||!v) return;
+      if(SHIP_D.indexOf(f)>=0){
+        var pd=parseDay(v);
+        if(pd.d){o[f]=pd.d;if(f==='delivery')o.deltag=pd.tag}
+        else extra.push(fieldName(f)+'：'+v);
+      }else if(f==='mode'){o.mode=/空/.test(v)?'空':/海/.test(v)?'海':v}
+      else if(f==='no'){o.no=v.replace(/[、,，]\s*\n?/g,'\n').replace(/\n+/g,'\n').trim()}
+      else o[f]=o[f]?o[f]+'\n'+v:v;
+    });
+    if(!o.no&&!o.customer&&!o.items) return;
+    var note=o.note||'';
+    if(!o.mawb){var mm=/主號\s*[:：]\s*([\w-]+)/.exec(note);if(mm)o.mawb=mm[1]}
+    if(!o.flight){var ff=/(?:航班|flight)\s*[:：]?\s*([A-Z]{2}\s?\d{2,4}[A-Z]?)/i.exec(note);if(ff)o.flight=ff[1].replace(/\s/,'')}
+    if(extra.length) o.note=(note?note+'\n':'')+extra.join('\n');
+    list.push(o);
+  });
+  return {list:list,cols:cols.filter(Boolean)};
+}
+function fieldName(k){return {seq:'序',no:'單號',customer:'客戶端',address:'地點',contact:'聯絡人',mode:'運',
+  items:'項目',dims:'材積',weight:'重量',pickup:'提貨',cutoff:'截關',depart:'航班',arrive:'靠岸',
+  customs:'清關',delivery:'派送',mawb:'主號',flight:'航班號',note:'備註'}[k]||k}
+function shipKey(o){return (o.no||'').replace(/\s+/g,'')+'|'+(o.customer||'').replace(/\s+/g,'')}
+var impParsed=null;
+function impPreview(){
+  var r=readImport($('impText').value);impParsed=null;$('impGo').disabled=true;
+  if(r.err){$('impInfo').textContent=r.err;return}
+  if(!r.list.length){$('impInfo').textContent='有標題列，但下面沒有資料列';return}
+  var have={};liveShips().forEach(function(s){have[shipKey(s)]=s});
+  var add=0,upd=0;r.list.forEach(function(o){have[shipKey(o)]?upd++:add++});
+  impParsed=r.list;$('impGo').disabled=false;
+  $('impInfo').textContent='辨識到 '+r.list.length+' 筆：新增 '+add+'、更新 '+upd+'\n'+
+    '對應欄位：'+r.cols.map(fieldName).join('、');
+}
+$('impBtn').onclick=function(){$('impText').value='';$('impInfo').textContent='';impParsed=null;
+  $('impGo').disabled=true;$('impSheet').classList.add('on');setTimeout(function(){$('impText').focus()},50)};
+$('impCancel').onclick=function(){$('impSheet').classList.remove('on')};
+$('impText').addEventListener('input',impPreview);
+$('impGo').onclick=async function(){
+  if(!impParsed) return;
+  var have={};liveShips().forEach(function(s){have[shipKey(s)]=s});
+  var now=Date.now(),n=0;
+  for(var i=0;i<impParsed.length;i++){
+    var o=impParsed[i],s=have[shipKey(o)];
+    if(s){ Object.keys(o).forEach(function(f){s[f]=o[f]}) }      // 只覆蓋 Excel 有的欄位
+    else{
+      s={id:uid(),done:false,deleted:false,created:now+i,created_by:me()};
+      SHIP_F.forEach(function(f){s[f]=o[f]||''});
+      ships.push(s);have[shipKey(o)]=s;
+    }
+    s.updated=now+i;s.updated_by=me();s.dirty=true;await putShipDB(s);n++;
+    if(o.customer&&sites.indexOf(o.customer)<0){sites.push(o.customer);pushSite(o.customer)}
+  }
+  await putMeta('sites',sites);
+  $('impSheet').classList.remove('on');shipFilter='all';
+  [].forEach.call($('shipFilter').children,function(x){x.classList.toggle('on',x.dataset.sf==='all')});
+  render();scheduleSync();toast('已匯入 '+n+' 筆');
+};
+/* 匯出成 Excel 開得起來的 CSV（含 BOM，中文不會亂碼），欄位順序跟原本的表一樣 */
+$('expBtn').onclick=function(){
+  var list=shipVisible();
+  if(!list.length){toast('目前條件下沒有資料可匯出');return}
+  function ymd(d){if(!d)return '';var x=d.split('-');return x[0]+'/'+(+x[1])+'/'+(+x[2])}
+  var head=['序','單號','客戶端','地點','運','項目/數量','材積尺寸/mm','重量','提貨時間','截關時間',
+    '航班時間','靠岸時間','清關','派送時間','主號','航班號','備註','狀態'];
+  var rows=list.map(function(s){return [s.seq,s.no,s.customer,[s.address,s.contact].filter(Boolean).join('\n'),
+    s.mode,s.items,s.dims,s.weight,ymd(s.pickup),ymd(s.cutoff),ymd(s.depart),ymd(s.arrive),ymd(s.customs),
+    s.delivery?(s.deltag==='暫定'?'暫定':'')+ymd(s.delivery)+(s.deltag==='前'?'前':''):'',
+    s.mawb,s.flight,s.note,shipStage(s).t]});
+  var csv='\ufeff'+[head].concat(rows).map(function(r){return r.map(function(v){
+    v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')}).join('\r\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='出貨看板-'+today()+'.csv';a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+  toast('已匯出 '+list.length+' 筆');
+};
 
 /* ================= 借出登記 ================= */
 /* 配件清單：文字一行一項 ↔ [{t:'快接頭 ×4',ok:false}]，ok＝已收回 */
