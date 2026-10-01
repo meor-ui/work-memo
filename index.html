@@ -101,7 +101,7 @@
   .ship .foot{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;
     color:var(--muted);font-family:var(--mono);flex-wrap:wrap}
   .ship .foot .acts{margin-left:auto;display:flex;gap:2px}
-  .ship .foot button{background:transparent;border:0;color:var(--muted);font-size:12.5px;
+  .ship .foot button{background:transparent;border:0;color:var(--muted);font-size:12.5px;white-space:nowrap;
     padding:6px 8px;border-radius:5px}
   .pend{color:var(--amber)}
 
@@ -208,6 +208,46 @@
   .field small{display:block;font-size:11px;color:var(--muted);margin-top:5px;line-height:1.6}
   .sheetfoot{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
   .sheetfoot button{flex:1 1 46%}
+  .field select{width:100%;background:var(--ink);border:1px solid var(--line);border-radius:8px;
+     color:var(--paper);padding:11px;font-size:15px;font-family:inherit;min-height:46px;color-scheme:dark}
+  .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--paper);min-height:44px}
+  .chk input{width:20px;height:20px;accent-color:var(--amber)}
+  .formph{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .formph .queue{margin:0}
+  .formph small{font-size:11px;color:var(--muted)}
+
+  /* ---- 借出登記 ---- */
+  .ship.late{border-color:var(--red)}
+  .ship .stage.late{color:var(--red);border-color:var(--red)}
+  .parts{margin-top:9px;border-top:1px dashed var(--line);padding-top:8px}
+  .parts .ph{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:6px}
+  .parts .ph b{color:var(--paper)} .parts .ph .miss{color:var(--red)}
+  .parts .pl{display:flex;flex-wrap:wrap;gap:6px}
+  .part{background:transparent;border:1px solid var(--line);color:var(--paper);border-radius:999px;
+    padding:7px 11px;font-size:13px;min-height:36px;text-align:left}
+  .part.ok{border-color:var(--green);color:var(--green)}
+  .part.miss{border-color:var(--red);color:var(--red)}
+  .ship .shelf{margin-top:8px}
+
+  /* ---- 異常紀錄 ---- */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+  .chips button{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    border-radius:999px;padding:8px 12px;font-size:13px;min-height:38px}
+  .chips button b{font-family:var(--mono);font-weight:600;margin-left:4px;color:var(--paper)}
+  .chips button.on{background:var(--panel-2);color:var(--paper);border-color:var(--coolant)}
+  .chips button.zero{opacity:.45}
+  .cat{flex:none;font-size:11px;font-weight:600;color:var(--ink);background:var(--c);
+    border-radius:4px;padding:2px 7px;margin-right:6px;vertical-align:2px}
+  .ttl{font-size:15.5px;font-weight:600;line-height:1.5;word-break:break-word}
+  .open-tag{font-size:11px;color:var(--amber);border:1px solid var(--amber);border-radius:999px;
+    padding:1px 7px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+  .issue .text{margin-top:5px;color:#c9d6df}
+  .issue .text.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .movesel{position:relative;display:inline-flex;align-items:center;color:var(--muted);
+    font-size:12.5px;padding:6px 7px;border-radius:5px}
+  .movesel select{position:absolute;inset:0;opacity:0;width:100%;font-size:16px}
+  mark{background:rgba(255,161,74,.35);color:inherit;border-radius:2px}
+  .tabs button{padding:13px 2px;font-size:13.5px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -240,6 +280,8 @@
     <div class="tabs" id="homeTabs">
       <button class="on" data-tab="board" type="button">出貨看板</button>
       <button data-tab="sites" type="button">站點備忘</button>
+      <button data-tab="loans" type="button">借出登記</button>
+      <button data-tab="issues" type="button">異常紀錄</button>
     </div>
 
     <section id="paneBoard">
@@ -263,6 +305,31 @@
         <button class="ghost" id="addSiteBtn" type="button" style="flex:1">＋ 新增站點</button>
         <button class="ghost" id="manageBtn" type="button" style="flex:1">管理站點</button>
       </div>
+    </section>
+
+    <section id="paneLoans" class="hide">
+      <button class="primary wide" id="newLoanBtn" type="button">＋ 借出登記</button>
+      <div class="filters">
+        <input id="loanSearch" type="search" placeholder="搜尋對象、機台、序號、配件" />
+        <div class="segmented" id="loanFilter">
+          <button class="on" data-lf="out" type="button">借出中</button>
+          <button data-lf="late" type="button">逾期</button>
+          <button data-lf="back" type="button">已歸還</button>
+          <button data-lf="all" type="button">全部</button>
+        </div>
+      </div>
+      <div id="loanList"></div>
+      <p id="loanEmpty" class="empty"></p>
+    </section>
+
+    <section id="paneIssues" class="hide">
+      <button class="primary wide" id="newIssueBtn" type="button">＋ 新增異常紀錄</button>
+      <div class="filters">
+        <input id="issueSearch" type="search" placeholder="搜尋現象、錯誤碼、處理方式" />
+      </div>
+      <div class="chips" id="issueCats"></div>
+      <ul id="issueList" class="list"></ul>
+      <p id="issueEmpty" class="empty"></p>
     </section>
   </div>
 
@@ -360,6 +427,58 @@
   </div>
 </div>
 
+<div class="sheet" id="loanSheet">
+  <div class="sheetbox">
+    <h2 id="loanFormTitle">借出登記</h2>
+    <div class="row2">
+      <div class="field"><label for="lParty">借給誰</label><input id="lParty" placeholder="智邦 王工程師／同事 小林" /></div>
+      <div class="field"><label for="lSite">站點</label><input id="lSite" list="siteOptions" placeholder="智邦 竹北" /></div>
+    </div>
+    <div class="field"><label for="lContact">聯絡電話</label><input id="lContact" placeholder="0912345678" inputmode="tel" /></div>
+    <div class="row2">
+      <div class="field"><label for="lItem">機台／設備</label><input id="lItem" placeholder="CDU 測試機、真空泵" /></div>
+      <div class="field"><label for="lSerial">序號／編號</label><input id="lSerial" placeholder="SN-2026-0012" /></div>
+    </div>
+    <div class="field"><label for="lParts">配件／機構（一行一項）</label>
+      <textarea id="lParts" rows="4" placeholder="快接頭 ×4&#10;軟管 2m ×2&#10;壓力錶"></textarea>
+      <small>歸還時可在卡片上逐項勾選，漏還的會標紅。</small></div>
+    <div class="row2">
+      <div class="field"><label for="lOut">借出日</label><input type="date" id="lOut" /></div>
+      <div class="field"><label for="lDue">預計歸還</label><input type="date" id="lDue" /></div>
+      <div class="field"><label for="lBack">實際歸還</label><input type="date" id="lBack" /></div>
+    </div>
+    <div class="field"><label for="lNote">備註</label><textarea id="lNote" placeholder="借出時外觀、狀況…"></textarea></div>
+    <div class="field"><label>照片</label>
+      <div class="formph"><div class="queue" id="loanQueue"></div>
+        <button class="ghost" id="loanPic" type="button">🖼 加照片</button><small id="loanPhNote"></small></div></div>
+    <div class="sheetfoot">
+      <button class="primary" id="loanSave" type="button">儲存</button>
+      <button class="ghost" id="loanCancel" type="button">取消</button>
+      <button class="ghost" id="loanDelete" type="button">刪除這筆</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="issueSheet">
+  <div class="sheetbox">
+    <h2 id="issueFormTitle">新增異常紀錄</h2>
+    <div class="field"><label for="iCat">分類</label><select id="iCat"></select></div>
+    <div class="field"><label for="iTitle">標題</label><input id="iTitle" placeholder="例如：注液泵 E-102 流量不足" /></div>
+    <div class="field"><label for="iBody">內容</label>
+      <textarea id="iBody" rows="7" placeholder="現象、錯誤碼、原因、處理步驟…"></textarea>
+      <small><a href="#" id="iTpl">套用範本（現象／原因／處理）</a></small></div>
+    <label class="chk"><input type="checkbox" id="iOpen" /> 尚未解決（之後補上處理方式）</label>
+    <div class="field"><label>照片</label>
+      <div class="formph"><div class="queue" id="issueQueue"></div>
+        <button class="ghost" id="issuePic" type="button">🖼 加照片</button><small id="issuePhNote"></small></div></div>
+    <div class="sheetfoot">
+      <button class="primary" id="issueSave" type="button">儲存</button>
+      <button class="ghost" id="issueCancel" type="button">取消</button>
+      <button class="ghost" id="issueDelete" type="button">刪除這筆</button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet" id="sheet">
   <div class="sheetbox">
     <h2>設定</h2>
@@ -384,9 +503,11 @@
 /* ================= IndexedDB ================= */
 var DB=null;
 function openDB(){return new Promise(function(res,rej){
-  var r=indexedDB.open('workmemo',2);
+  var r=indexedDB.open('workmemo',3);
   r.onupgradeneeded=function(){
     var db=r.result;
+    if(!db.objectStoreNames.contains('loans')) db.createObjectStore('loans',{keyPath:'id'});
+    if(!db.objectStoreNames.contains('issues')) db.createObjectStore('issues',{keyPath:'id'});
     if(!db.objectStoreNames.contains('notes')) db.createObjectStore('notes',{keyPath:'id'});
     if(!db.objectStoreNames.contains('photos')) db.createObjectStore('photos',{keyPath:'id'});
     if(!db.objectStoreNames.contains('meta')) db.createObjectStore('meta',{keyPath:'k'});
@@ -408,6 +529,11 @@ function putPhoto(p){return req(stx('photos','readwrite').put(p))}
 function getPhoto(id){return req(stx('photos').get(id))}
 function delPhoto(id){return req(stx('photos','readwrite').delete(id))}
 function allPhotos(){return req(stx('photos').getAll())}
+function dbPut(s,o){return req(stx(s,'readwrite').put(o))}
+function dbDel(s,id){return req(stx(s,'readwrite').delete(id))}
+function dbAll(s){return req(stx(s).getAll())}
+function putLoan(o){return dbPut('loans',o)}
+function putIssue(o){return dbPut('issues',o)}
 function putMeta(k,v){return req(stx('meta','readwrite').put({k:k,v:v}))}
 function getMeta(k){return req(stx('meta').get(k)).then(function(r){return r?r.v:null})}
 
@@ -415,13 +541,21 @@ function getMeta(k){return req(stx('meta').get(k)).then(function(r){return r?r.v
 var PALETTE=['#3fc8dd','#ffa14a','#a78bfa','#5ed6a0','#ff7f9e','#7ab7ff'];
 var DEFAULT_SITES=['智邦 竹北','智邦 新竹','英業達桃園','英業達大溪','緯創','辦公室','其他'];
 var BUCKET='memo-photos';
-var notes=[],ships=[],sites=DEFAULT_SITES.slice();
-var view='home',tab='board',curSite='',editingShip=null;
+var CATS=['PLC','注液','排液','真空','烘乾','注氮','保壓','沖洗','上位機','CDU','其它'];
+var notes=[],ships=[],loans=[],issues=[],sites=DEFAULT_SITES.slice();
+var view='home',tab='board',curSite='',editingShip=null,editingLoan=null,editingIssue=null;
 var filter='open',q='',shipFilter='active',shipQ='';
-var opened={},queue=[],urls={},attachTo=null,manageMode=false;
+var loanFilter='out',loanQ='',issueCat='全部',issueQ='';
+/* picTarget：相簿選完照片要送去哪裡
+   null＝站點輸入框佇列；{obj,touch}＝直接附加到某筆資料；{arr,box}＝表單內的暫存佇列 */
+var opened={},queue=[],loanQueue=[],issueQueue=[],urls={},picTarget=null,manageMode=false;
 var cfg={url:'',key:'',user:''};
-var pullMark={notes:'1970-01-01T00:00:00Z',shipments:'1970-01-01T00:00:00Z'};
-var syncing=false,syncTimer=null;
+var EPOCH='1970-01-01T00:00:00Z';
+/* v6 起改用伺服器時間 synced_at 當拉取游標，key 換成 pullMark2 讓舊裝置完整重拉一次 */
+var pullMark={notes:EPOCH,shipments:EPOCH,loans:EPOCH,issues:EPOCH};
+var syncCol={};          // 雲端若尚未跑 v6 SQL，暫時退回用 updated_at
+var pendingSites=[];     // 離線時新增、還沒成功推上雲端的站點
+var syncing=false,syncAgain=false,syncTimer=null,autoOn=false;
 var $=function(id){return document.getElementById(id)};
 
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');
@@ -449,6 +583,18 @@ function me(){return cfg.user||'未具名'}
 function online(){return !!(cfg.url&&cfg.key)}
 function liveNotes(){return notes.filter(function(n){return !n.deleted})}
 function liveShips(){return ships.filter(function(s){return !s.deleted})}
+function liveLoans(){return loans.filter(function(x){return !x.deleted})}
+function liveIssues(){return issues.filter(function(x){return !x.deleted})}
+/* 本地時區的日期字串（避免 toISOString 在台灣 0~8 點差一天） */
+function dayStr(offset){var d=new Date();d.setDate(d.getDate()+(offset||0));
+  return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function dayDiff(a,b){return Math.round((Date.parse(a+'T00:00:00Z')-Date.parse(b+'T00:00:00Z'))/864e5)}
+function telLinks(txt){var h=esc(txt);
+  phones(txt).forEach(function(p){h=h.replace(p,'<a href="tel:'+p.replace(/-/g,'')+'">'+p+'</a>')});return h}
+function share(txt){
+  if(navigator.share){navigator.share({text:txt}).catch(function(){});return}
+  navigator.clipboard.writeText(txt).then(function(){toast('已複製')},function(){prompt('手動複製：',txt)});
+}
 function phones(txt){return (String(txt||'').match(/0\d{1,3}-?\d{3}-?\d{3,4}/g)||[])}
 
 /* ================= Supabase REST ================= */
@@ -488,66 +634,141 @@ function shipFrom(r){
   SHIP_F.forEach(function(f){o[f]=r[f]||''});
   return o;
 }
+/* ---- 通用欄位轉換（借出、異常紀錄共用）----
+   型別：s 文字、d 日期(YYYY-MM-DD)、b 布林、j JSON、a 文字陣列 */
+var LOAN_SPEC={party:'s',site:'s',contact:'s',item:'s',serial:'s',parts:'j',
+  out_date:'d',due_date:'d',back_date:'d',note:'s',done:'b',photos:'a'};
+var ISSUE_SPEC={category:'s',title:'s',body:'s',unsolved:'b',photos:'a'};
+function mkRow(spec){return function(x){
+  var o={id:x.id,deleted:!!x.deleted,
+    created_at:new Date(x.created).toISOString(),
+    updated_at:new Date(x.updated||x.created).toISOString(),
+    created_by:x.created_by||'',updated_by:x.updated_by||''};
+  Object.keys(spec).forEach(function(f){var t=spec[f],v=x[f];
+    o[f]=t==='d'?(v||null):t==='b'?!!v:(t==='j'||t==='a')?(v||[]):(v||'')});
+  return o;
+}}
+function mkFrom(spec){return function(r){
+  var o={id:r.id,deleted:!!r.deleted,
+    created:new Date(r.created_at).getTime(),updated:new Date(r.updated_at).getTime(),
+    created_by:r.created_by||'',updated_by:r.updated_by||'',dirty:false};
+  Object.keys(spec).forEach(function(f){var t=spec[f],v=r[f];
+    o[f]=t==='b'?!!v:(t==='j'||t==='a')?(v||[]):(v||'')});
+  return o;
+}}
+var loanRow=mkRow(LOAN_SPEC),loanFrom=mkFrom(LOAN_SPEC);
+var issueRow=mkRow(ISSUE_SPEC),issueFrom=mkFrom(ISSUE_SPEC);
+
 function setSync(cls,text){$('dot').className='dot '+cls;$('syncText').textContent=text}
 
 async function pushTable(table,arr,toRow,save){
   var dirty=arr.filter(function(x){return x.dirty});
   if(!dirty.length) return 0;
+  /* 記下送出當下的版本：上傳途中使用者又改了同一筆，就不能清掉 dirty，否則新改的會永遠推不上去 */
+  var snap=dirty.map(function(x){return x.updated});
   var res=await api('/rest/v1/'+table,{method:'POST',
     headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
     body:JSON.stringify(dirty.map(toRow))});
-  if(!res.ok) throw new Error('上傳失敗 '+res.status+' '+(await res.text()).slice(0,100));
-  for(var i=0;i<dirty.length;i++){dirty[i].dirty=false;await save(dirty[i])}
+  if(!res.ok) throw new Error(errMsg('上傳',res.status,await res.text()));
+  for(var i=0;i<dirty.length;i++){
+    if(dirty[i].updated===snap[i]){dirty[i].dirty=false;await save(dirty[i])}
+  }
   return dirty.length;
 }
+function errMsg(act,status,body){
+  if(status===404||/PGRST205|42P01|does not exist/.test(body)&&!/column/.test(body))
+    return '雲端缺資料表，請執行 add-v6.sql';
+  return act+'失敗 '+status+' '+String(body).slice(0,80);
+}
+/* 拉取：以伺服器寫入時間 synced_at 為游標（不受各裝置時鐘誤差、離線晚上傳影響），
+   第一頁往回重疊 10 秒，避免同時寫入的交易漏抓；分頁直到抓完。 */
 async function pullTable(table,arr,fromRow,save){
-  var mark=pullMark[table]||'1970-01-01T00:00:00Z';
-  var res=await api('/rest/v1/'+table+'?select=*&updated_at=gt.'+encodeURIComponent(mark)
-    +'&order=updated_at.asc&limit=500');
-  if(!res.ok) throw new Error('下載失敗 '+res.status+' '+(await res.text()).slice(0,100));
-  var rows=await res.json();
-  for(var i=0;i<rows.length;i++){
-    var r=rows[i],inc=fromRow(r),cur=null;
-    for(var j=0;j<arr.length;j++) if(arr[j].id===inc.id){cur=arr[j];break}
-    if(r.updated_at>pullMark[table]) pullMark[table]=r.updated_at;
-    if(cur&&cur.dirty&&cur.updated>=inc.updated) continue;
-    if(cur&&cur.updated>inc.updated) continue;
-    if(cur){Object.assign(cur,inc)} else {arr.push(inc)}
-    await save(cur||inc);
+  var col=syncCol[table]||'synced_at';
+  var mark=pullMark[table]||EPOCH,cursor=mark,total=0;
+  for(var page=0;page<40;page++){
+    var from=cursor;
+    if(page===0&&mark!==EPOCH) from=new Date(Date.parse(mark)-10000).toISOString();
+    var res=await api('/rest/v1/'+table+'?select=*&'+col+'=gt.'+encodeURIComponent(from)
+      +'&order='+col+'.asc&limit=500');
+    if(!res.ok){
+      var body=await res.text();
+      if(col==='synced_at'&&/synced_at/.test(body)){   // 雲端還沒加 synced_at 欄位 → 退回舊做法
+        syncCol[table]='updated_at';return pullTable(table,arr,fromRow,save);
+      }
+      throw new Error(errMsg('下載',res.status,body));
+    }
+    var rows=await res.json();
+    for(var i=0;i<rows.length;i++){
+      var r=rows[i],inc=fromRow(r),cur=null;
+      for(var j=0;j<arr.length;j++) if(arr[j].id===inc.id){cur=arr[j];break}
+      if(r[col]&&Date.parse(r[col])>Date.parse(cursor)) cursor=r[col];
+      if(cur&&cur.dirty&&cur.updated>=inc.updated) continue;   // 本機較新且未上傳 → 保留本機
+      if(cur&&cur.updated>=inc.updated) continue;              // 重疊區重抓到的同版本 → 略過
+      if(cur){Object.assign(cur,inc)} else {arr.push(inc)}
+      await save(cur||inc);
+    }
+    total+=rows.length;
+    if(rows.length<500) break;
   }
-  if(rows.length) await putMeta('pullMark',pullMark);
-  return rows.length;
+  if(cursor!==mark){pullMark[table]=cursor;await putMeta('pullMark2',pullMark)}
+  return total;
 }
 async function pullSites(){
   var res=await api('/rest/v1/sites?select=name&order=name.asc');
   if(!res.ok) return;
   var rows=await res.json(); if(!rows.length) return;
   var names=rows.map(function(r){return r.name});
+  // 還沒推上去的站點要保留，否則離線新增的站點會被雲端清單蓋掉
+  pendingSites.forEach(function(n){if(names.indexOf(n)<0)names.push(n)});
   if(names.join('|')!==sites.join('|')){sites=names;await putMeta('sites',sites)}
 }
 async function pushSite(name){
-  if(!online()) return;
-  try{await api('/rest/v1/sites',{method:'POST',
-    headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify([{name:name}])})}catch(e){}
+  if(pendingSites.indexOf(name)<0){pendingSites.push(name);await putMeta('pendingSites',pendingSites)}
+  if(online()) await pushPendingSites();
 }
+async function pushPendingSites(){
+  if(!pendingSites.length) return;
+  try{
+    var res=await api('/rest/v1/sites',{method:'POST',
+      headers:{'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(pendingSites.map(function(n){return {name:n}}))});
+    if(res.ok){pendingSites=[];await putMeta('pendingSites',pendingSites)}
+  }catch(e){}
+}
+/* 各表獨立同步：其中一張表失敗（例如雲端還沒建 loans 表）不影響其他表 */
+var TABLES=[
+  {t:'notes',     name:'備忘',     arr:function(){return notes}, row:noteRow, from:noteFrom, save:putNote},
+  {t:'shipments', name:'出貨',     arr:function(){return ships}, row:shipRow, from:shipFrom, save:putShipDB},
+  {t:'loans',     name:'借出',     arr:function(){return loans}, row:loanRow, from:loanFrom, save:putLoan},
+  {t:'issues',    name:'異常紀錄', arr:function(){return issues},row:issueRow,from:issueFrom,save:putIssue}
+];
 async function sync(quiet){
   if(!online()){setSync('off','尚未設定共用（資料只存在本機）');return}
-  if(syncing) return;
+  if(syncing){syncAgain=true;return}   // 同步中又有改動 → 結束後再跑一輪
   syncing=true;setSync('busy','同步中…');
+  var errs=[];
   try{
-    await pushTable('notes',notes,noteRow,putNote);
-    await pushTable('shipments',ships,shipRow,putShipDB);
-    await pullTable('notes',notes,noteFrom,putNote);
-    await pullTable('shipments',ships,shipFrom,putShipDB);
+    await pushPendingSites();
+    for(var i=0;i<TABLES.length;i++){
+      var T=TABLES[i];
+      try{
+        await pushTable(T.t,T.arr(),T.row,T.save);
+        await pullTable(T.t,T.arr(),T.from,T.save);
+      }catch(e){errs.push(T.name+'：'+(e.message||'網路異常'))}
+    }
     await pullSites();
     await uploadPending();
-    setSync('ok','已同步 · '+p2(new Date().getHours())+':'+p2(new Date().getMinutes())+' · '+me());
-    render();
-  }catch(e){
-    setSync('err','同步失敗：'+(e.message||'網路異常'));
+  }catch(e){errs.push(e.message||'網路異常')}
+  finally{syncing=false}
+  if(errs.length){
+    setSync('err','同步失敗 · '+errs.join('；'));
     if(!quiet) toast('同步失敗，稍後自動重試');
-  }finally{syncing=false}
+  }else{
+    var legacy=Object.keys(syncCol).length?' · 請執行 add-v6.sql':'';
+    setSync(legacy?'busy':'ok','已同步 · '+p2(new Date().getHours())+':'+p2(new Date().getMinutes())+' · '+me()+legacy);
+  }
+  render();
+  if(syncAgain){syncAgain=false;scheduleSync()}
 }
 function scheduleSync(){if(!online())return;clearTimeout(syncTimer);
   syncTimer=setTimeout(function(){sync(true)},1500)}
@@ -568,26 +789,41 @@ function shrink(file,max,quality){
     img.src=u;
   });
 }
+/* 壓縮照片，回傳照片紀錄陣列（尚未存檔） */
 async function intake(files){
+  var out=[];
   for(var i=0;i<files.length;i++){
     var f=files[i]; if(!f.type||f.type.indexOf('image/')!==0) continue;
     try{
       var full=await shrink(f,1600,.78),thumb=await shrink(f,320,.7);
-      queue.push({id:uid(),full:full,thumb:thumb,created:Date.now(),uploaded:false});
+      out.push({id:uid(),full:full,thumb:thumb,created:Date.now(),uploaded:false});
     }catch(e){toast('有一張照片處理失敗')}
   }
-  renderQueue();
+  return out;
 }
 function objURL(k,blob){if(!urls[k])urls[k]=URL.createObjectURL(blob);return urls[k]}
-function renderQueue(){
-  var box=$('queue');box.innerHTML='';
-  queue.forEach(function(p,i){
+function renderQ(boxId,arr){
+  var box=$(boxId);box.innerHTML='';
+  arr.forEach(function(p,i){
     var fig=document.createElement('figure');
     var im=document.createElement('img');im.src=objURL('q'+p.id,p.thumb);
     var x=document.createElement('button');x.type='button';x.textContent='✕';
-    x.onclick=function(){queue.splice(i,1);renderQueue()};
+    x.onclick=function(){arr.splice(i,1);renderQ(boxId,arr)};
     fig.appendChild(im);fig.appendChild(x);box.appendChild(fig);
   });
+}
+function renderQueue(){renderQ('queue',queue)}
+/* 表單儲存時把暫存照片寫入本機並掛到資料上 */
+async function commitQueue(arr,obj){
+  obj.photos=obj.photos||[];
+  for(var i=0;i<arr.length;i++){await putPhoto(arr[i]);obj.photos.push(arr[i].id)}
+  arr.length=0;
+}
+async function removeStoragePhoto(id){
+  if(!online()) return;
+  try{await api('/storage/v1/object/'+BUCKET,{method:'DELETE',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prefixes:[id+'.jpg',id+'_t.jpg']})})}catch(e){}
 }
 async function upload(p){
   if(!online()||p.uploaded) return;
@@ -632,7 +868,7 @@ function shipVisible(){
     if(shipFilter==='week'){
       var ds=[s.pickup,s.customs,s.delivery].filter(Boolean);
       if(!ds.length) return false;
-      var lim=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
+      var lim=dayStr(7);
       if(!ds.some(function(d){return d>=t&&d<=lim})) return false;
     }
     if(shipQ){
@@ -696,12 +932,14 @@ function renderSiteGrid(){
     var open=ns.filter(function(n){return !n.done}).length;
     var late=ns.filter(function(n){return !n.done&&n.due&&n.due<now}).length;
     var sh=liveShips().filter(function(s){return !s.done&&s.customer===name}).length;
+    var ln=liveLoans().filter(function(l){return !l.done&&l.site===name}).length;
     var b=document.createElement('button');
     b.type='button';b.className='sitecard';b.style.setProperty('--c',color(name));
     b.innerHTML='<div class="nm">'+esc(name)+'</div><div class="nums">'+
       '<span><b>'+open+'</b>待辦</span>'+
       (late?'<span class="late"><b>'+late+'</b>逾期</span>':'')+
-      (sh?'<span class="shp"><b>'+sh+'</b>在途</span>':'')+'</div>';
+      (sh?'<span class="shp"><b>'+sh+'</b>在途</span>':'')+
+      (ln?'<span class="late"><b>'+ln+'</b>借出</span>':'')+'</div>';
     b.onclick=function(){if(!manageMode) enterSite(name)};
     if(manageMode){
       var x=document.createElement('button');
@@ -718,14 +956,16 @@ function renderSiteGrid(){
 async function removeSite(name){
   var ns=liveNotes().filter(function(n){return n.site===name});
   var ss=liveShips().filter(function(s){return s.customer===name});
-  if(ns.length||ss.length){
-    alert('「'+name+'」還有 '+ns.length+' 則備忘、'+ss.length+' 筆出貨資料。\n'+
+  var ls=liveLoans().filter(function(l){return !l.done&&l.site===name});
+  if(ns.length||ss.length||ls.length){
+    alert('「'+name+'」還有 '+ns.length+' 則備忘、'+ss.length+' 筆出貨、'+ls.length+' 筆借出中資料。\n'+
       '請先把它們刪掉或改到別的站點，再刪除這個站點。');
     return;
   }
   if(!confirm('刪除站點「'+name+'」？'+(online()?'\n同事那邊也會消失。':''))) return;
   sites=sites.filter(function(x){return x!==name});
   await putMeta('sites',sites);
+  pendingSites=pendingSites.filter(function(x){return x!==name});await putMeta('pendingSites',pendingSites);
   if(online()){
     try{ await api('/rest/v1/sites?name=eq.'+encodeURIComponent(name),{method:'DELETE'}) }
     catch(e){ toast('站點已從這台裝置移除，但雲端刪除失敗，下次同步會再出現') }
@@ -787,17 +1027,324 @@ async function touchShip(s){
   await putShipDB(s);render();scheduleSync();
 }
 
+/* ================= 借出登記 ================= */
+/* 配件清單：文字一行一項 ↔ [{t:'快接頭 ×4',ok:false}]，ok＝已收回 */
+function partsFromText(txt,old){
+  var prev={};(old||[]).forEach(function(p){prev[p.t]=p.ok});
+  return String(txt||'').split('\n').map(function(t){return t.trim()}).filter(Boolean)
+    .map(function(t){return {t:t,ok:!!prev[t]}});   // 編輯時同名項目保留勾選狀態
+}
+function loanLate(l){return !l.done&&l.due_date&&l.due_date<today()}
+function loanStage(l){
+  if(l.done) return {k:'ok',t:'已歸還 '+md(l.back_date)};
+  if(l.due_date){
+    var d=dayDiff(l.due_date,today());
+    if(d<0) return {k:'late',t:'逾期 '+(-d)+' 天'};
+    if(d===0) return {k:'warn',t:'今天到期'};
+    if(d<=3) return {k:'warn',t:'剩 '+d+' 天'};
+    return {k:'go',t:'借出中 · '+md(l.due_date)+' 還'};
+  }
+  return {k:'go',t:'借出中'};
+}
+function loanVisible(){
+  return liveLoans().filter(function(l){
+    if(loanFilter==='out'&&l.done) return false;
+    if(loanFilter==='back'&&!l.done) return false;
+    if(loanFilter==='late'&&!loanLate(l)) return false;
+    if(loanQ){
+      var hay=[l.party,l.site,l.contact,l.item,l.serial,l.note,l.created_by]
+        .concat((l.parts||[]).map(function(p){return p.t})).join(' ').toLowerCase();
+      if(hay.indexOf(loanQ)<0) return false;
+    }
+    return true;
+  }).sort(function(a,b){
+    if(a.done!==b.done) return a.done?1:-1;
+    if(a.done) return (b.back_date||'').localeCompare(a.back_date||'')||b.updated-a.updated;
+    var ad=a.due_date||'9999',bd=b.due_date||'9999';
+    if(ad!==bd) return ad<bd?-1:1;
+    return b.created-a.created;
+  });
+}
+function renderLoans(){
+  var box=$('loanList');box.innerHTML='';
+  var items=loanVisible();
+  if(!items.length){
+    $('loanEmpty').textContent=liveLoans().length?'這個條件下沒有借出資料。'
+      :'還沒有借出紀錄。\n按上面「＋ 借出登記」建立第一筆。';
+    return;
+  }
+  $('loanEmpty').textContent='';
+  items.forEach(function(l){
+    var el=document.createElement('div'),st=loanStage(l),late=st.k==='late';
+    el.className='ship'+(l.done?' done':'')+(late?' late':'');
+    el.style.setProperty('--c',color(l.site||l.party));
+    var parts=l.parts||[],back=parts.filter(function(p){return p.ok}).length,miss=parts.length-back;
+    function leg(label,d,past){
+      return '<div class="leg'+(d?' set':'')+(past?' past':'')+'"><span>'+label+'</span>'+md(d)+'</div>'}
+    var np=(l.photos||[]).length;
+    el.innerHTML=
+      '<div class="top"><span class="cust">'+esc(l.party||'未填對象')+'</span>'+
+        (l.site?'<span class="no">'+esc(l.site)+'</span>':'')+
+        '<span class="stage '+st.k+'">'+st.t+'</span></div>'+
+      '<div class="items">'+esc(l.item||'（未填機台）')+'</div>'+
+      (l.serial?'<div class="spec">S/N '+esc(l.serial)+'</div>':'')+
+      (l.contact?'<div class="addr">'+telLinks(l.contact)+'</div>':'')+
+      (parts.length?'<div class="parts"><div class="ph">配件／機構 <b>'+back+'/'+parts.length+'</b> 已收回'+
+        (l.done&&miss?' · <span class="miss">缺 '+miss+' 項</span>':'')+'</div><div class="pl"></div></div>':'')+
+      (l.note?'<div class="addr">📝 '+esc(l.note)+'</div>':'')+
+      '<div class="track">'+leg('借出',l.out_date,!!l.out_date)+leg('預計歸還',l.due_date,false)+
+        leg('實際歸還',l.back_date,!!l.back_date)+'</div>'+
+      '<div class="foot">'+(l.created_by?'<span>@'+esc(l.created_by)+
+        (l.updated_by&&l.updated_by!==l.created_by?' ✎'+esc(l.updated_by):'')+'</span>':'')+
+        (l.dirty&&online()?'<span class="pend">待同步</span>':'')+
+        (np?'<button class="clip" data-a="toggle">📎 '+np+(opened[l.id]?' ▲':' ▼')+'</button>':'')+
+        '<span class="acts"><button data-a="done">'+(l.done?'重新借出':'歸還')+'</button>'+
+        '<button data-a="photo">＋照片</button><button data-a="share">分享</button>'+
+        '<button data-a="edit">編輯</button></span></div>';
+    var pl=el.querySelector('.pl');
+    parts.forEach(function(p){
+      var b=document.createElement('button');b.type='button';
+      b.className='part'+(p.ok?' ok':(l.done?' miss':''));
+      b.textContent=(p.ok?'✓ ':'○ ')+p.t;
+      b.onclick=function(){p.ok=!p.ok;touchLoan(l)};
+      pl.appendChild(b);
+    });
+    el.querySelector('[data-a="edit"]').onclick=function(){openLoan(l)};
+    el.querySelector('[data-a="done"]').onclick=function(){toggleReturn(l)};
+    el.querySelector('[data-a="photo"]').onclick=function(){pickPhotos({obj:l,touch:touchLoan})};
+    el.querySelector('[data-a="share"]').onclick=function(){share(loanText(l))};
+    var tg=el.querySelector('[data-a="toggle"]');
+    if(tg) tg.onclick=function(){opened[l.id]=!opened[l.id];render()};
+    if(np&&opened[l.id]) shelf(el,l,touchLoan);
+    box.appendChild(el);
+  });
+}
+function toggleReturn(l){
+  if(l.done){
+    if(!confirm('改回「借出中」？'))return;
+    l.done=false;l.back_date='';touchLoan(l);return;
+  }
+  var miss=(l.parts||[]).filter(function(p){return !p.ok});
+  if(miss.length){
+    var ok=confirm('還有 '+miss.length+' 項配件沒勾選：\n・'+miss.map(function(p){return p.t}).join('\n・')+
+      '\n\n按「確定」＝全部已收回並結案\n按「取消」＝先不結案，回卡片逐項勾選');
+    if(!ok) return;
+    miss.forEach(function(p){p.ok=true});
+  }
+  l.done=true;l.back_date=today();touchLoan(l);toast('已標記歸還');
+}
+function loanText(l){
+  return '【借出單】'+(l.party||'')+(l.site?'（'+l.site+'）':'')+'\n'+
+    '機台：'+(l.item||'')+(l.serial?'　S/N '+l.serial:'')+'\n'+
+    ((l.parts||[]).length?'配件：\n'+l.parts.map(function(p){return '　'+(p.ok?'✓':'・')+p.t}).join('\n')+'\n':'')+
+    '借出：'+(l.out_date||'—')+'　預計歸還：'+(l.due_date||'—')+
+    (l.back_date?'　已歸還：'+l.back_date:'')+'\n'+
+    (l.note?'備註：'+l.note+'\n':'')+'經手：'+(l.created_by||me());
+}
+function openLoan(l){
+  editingLoan=l||null;loanQueue.length=0;renderQ('loanQueue',loanQueue);
+  $('loanFormTitle').textContent=l?'編輯借出':'借出登記';
+  $('loanDelete').style.display=l?'':'none';
+  var v=l||{party:'',site:(view==='site'?curSite:''),contact:'',item:'',serial:'',parts:[],
+    out_date:today(),due_date:'',back_date:'',note:''};
+  $('lParty').value=v.party||'';$('lSite').value=v.site||'';$('lContact').value=v.contact||'';
+  $('lItem').value=v.item||'';$('lSerial').value=v.serial||'';
+  $('lParts').value=(v.parts||[]).map(function(p){return p.t}).join('\n');
+  $('lOut').value=v.out_date||'';$('lDue').value=v.due_date||'';$('lBack').value=v.back_date||'';
+  $('lNote').value=v.note||'';
+  $('loanPhNote').textContent=l&&(l.photos||[]).length?'已有 '+l.photos.length+' 張，可在卡片上檢視':'';
+  $('loanSheet').classList.add('on');
+}
+function closeLoan(){$('loanSheet').classList.remove('on');editingLoan=null;loanQueue.length=0}
+$('newLoanBtn').onclick=function(){openLoan(null)};
+$('loanCancel').onclick=closeLoan;
+$('loanPic').onclick=function(){pickPhotos({arr:loanQueue,box:'loanQueue'})};
+$('loanSave').onclick=async function(){
+  var v={party:$('lParty').value.trim(),site:$('lSite').value.trim(),contact:$('lContact').value.trim(),
+    item:$('lItem').value.trim(),serial:$('lSerial').value.trim(),
+    out_date:$('lOut').value,due_date:$('lDue').value,back_date:$('lBack').value,note:$('lNote').value.trim()};
+  if(!v.party&&!v.item){toast('至少要填「借給誰」或「機台」');return}
+  if(v.due_date&&v.out_date&&v.due_date<v.out_date){toast('預計歸還日早於借出日，請確認');return}
+  if(v.back_date&&v.out_date&&v.back_date<v.out_date){toast('實際歸還日早於借出日，請確認');return}
+  var l=editingLoan;
+  v.parts=partsFromText($('lParts').value,l&&l.parts);
+  if(l){Object.assign(l,v)}
+  else{
+    l=Object.assign({id:uid(),deleted:false,photos:[],created:Date.now(),
+      created_by:me(),updated_by:me()},v);
+    loans.push(l);
+  }
+  // 填了實際歸還日＝已歸還；清掉＝改回借出中（兩者保持一致，不會出現「已歸還卻沒有日期」）
+  l.done=!!v.back_date;
+  if(l.done) l.parts.forEach(function(p){p.ok=true});
+  await commitQueue(loanQueue,l);
+  if(v.site&&sites.indexOf(v.site)<0){sites.push(v.site);await putMeta('sites',sites);pushSite(v.site)}
+  closeLoan();touchLoan(l);
+};
+$('loanDelete').onclick=async function(){
+  if(!editingLoan||!confirm('刪除這筆借出紀錄？'+(online()?'\n同事那邊也會消失。':'')))return;
+  var l=editingLoan;closeLoan();await softDelete('loans',loans,l,touchLoan);
+};
+async function touchLoan(l){
+  l.updated=Date.now();l.updated_by=me();l.dirty=true;
+  await putLoan(l);render();scheduleSync();
+}
+/* 軟刪除：有共用就標記 deleted 同步出去；沒共用直接從本機刪 */
+async function softDelete(store,arr,x,touch){
+  x.deleted=true;delete opened[x.id];
+  if(!online()){
+    await dbDel(store,x.id);
+    var i=arr.indexOf(x);if(i>=0)arr.splice(i,1);
+    for(var k=0;k<(x.photos||[]).length;k++) if(!photoInUse(x.photos[k])) await delPhoto(x.photos[k]);
+    render();return;
+  }
+  touch(x);
+}
+[].forEach.call($('loanFilter').children,function(b){
+  b.onclick=function(){loanFilter=b.dataset.lf;syncLoanSeg();render()}});
+function syncLoanSeg(){[].forEach.call($('loanFilter').children,
+  function(x){x.classList.toggle('on',x.dataset.lf===loanFilter)})}
+$('loanSearch').addEventListener('input',function(){loanQ=this.value.trim().toLowerCase();render()});
+
+/* ================= 異常紀錄 ================= */
+function catOf(x){return CATS.indexOf(x.category)>=0?x.category:'其它'}
+function issueMatches(x){
+  if(!issueQ) return true;
+  return (x.title+' '+x.body+' '+x.category+' '+(x.created_by||'')).toLowerCase().indexOf(issueQ)>=0;
+}
+/* 搜尋關鍵字標亮（先跳脫再標，不會被注入 HTML） */
+function hl(s){
+  s=String(s||'');if(!issueQ) return esc(s);
+  var low=s.toLowerCase(),out='',i=0,k;
+  while((k=low.indexOf(issueQ,i))>=0){
+    out+=esc(s.slice(i,k))+'<mark>'+esc(s.slice(k,k+issueQ.length))+'</mark>';i=k+issueQ.length;
+  }
+  return out+esc(s.slice(i));
+}
+function renderIssues(){
+  var base=liveIssues().filter(issueMatches);
+  // 分類籤：數字反映目前搜尋結果，方便看「這個錯誤碼出現在哪幾類」
+  var cbox=$('issueCats');cbox.innerHTML='';
+  ['全部'].concat(CATS).forEach(function(c){
+    var n=c==='全部'?base.length:base.filter(function(x){return catOf(x)===c}).length;
+    var b=document.createElement('button');b.type='button';
+    b.className=(issueCat===c?'on':'')+(n?'':' zero');
+    b.innerHTML=esc(c)+'<b>'+n+'</b>';
+    b.onclick=function(){issueCat=c;render()};
+    cbox.appendChild(b);
+  });
+  var items=base.filter(function(x){return issueCat==='全部'||catOf(x)===issueCat})
+    .sort(function(a,b){
+      if(!!a.unsolved!==!!b.unsolved) return a.unsolved?-1:1;   // 未解決排前面
+      return b.updated-a.updated;
+    });
+  var list=$('issueList');list.innerHTML='';
+  if(!items.length){
+    $('issueEmpty').textContent=liveIssues().length?'這個條件下沒有紀錄。'
+      :'還沒有異常紀錄。\n把處理過的異常記下來，下次遇到直接搜尋。';
+    return;
+  }
+  $('issueEmpty').textContent='';
+  items.forEach(function(x){
+    var li=document.createElement('li'),cat=catOf(x),np=(x.photos||[]).length;
+    li.className='card issue';li.style.setProperty('--c',color(cat));
+    var long=(x.body||'').split('\n').length>3||(x.body||'').length>120;
+    var exp=opened['b'+x.id]||!!issueQ;   // 搜尋中自動展開，才看得到命中的段落
+    li.innerHTML='<div class="body">'+
+      '<div class="ttl"><span class="cat">'+esc(cat)+'</span>'+hl(x.title||'（無標題）')+
+        (x.unsolved?'<span class="open-tag">未解決</span>':'')+'</div>'+
+      (x.body?'<div class="text'+(long&&!exp?' clamp':'')+'">'+hl(x.body)+'</div>':'')+
+      '<div class="meta"><span>'+when(x.created)+'</span>'+
+        (x.created_by?'<span class="who">@'+esc(x.created_by)+
+          (x.updated_by&&x.updated_by!==x.created_by?' ✎'+esc(x.updated_by):'')+'</span>':'')+
+        (x.dirty&&online()?'<span class="pend">待同步</span>':'')+
+        (np?'<button class="clip" data-a="toggle">📎 '+np+(opened[x.id]?' ▲':' ▼')+'</button>':'')+
+        '<span class="acts">'+(long?'<button data-a="more">'+(exp?'收合':'全文')+'</button>':'')+
+        '<span class="movesel">移動▾<select aria-label="移動到分類"></select></span>'+
+        '<button data-a="photo">＋照片</button><button data-a="edit">編輯</button></span></div></div>';
+    var sel=li.querySelector('select');
+    CATS.forEach(function(c){var o=document.createElement('option');o.value=c;
+      o.textContent=(c===cat?'✓ ':'')+c;if(c===cat)o.selected=true;sel.appendChild(o)});
+    sel.onchange=function(){
+      if(sel.value===x.category) return;
+      x.category=sel.value;touchIssue(x);toast('已移動到「'+sel.value+'」');
+    };
+    var more=li.querySelector('[data-a="more"]');
+    if(more) more.onclick=function(){opened['b'+x.id]=!exp;render()};
+    li.querySelector('[data-a="edit"]').onclick=function(){openIssue(x)};
+    li.querySelector('[data-a="photo"]').onclick=function(){pickPhotos({obj:x,touch:touchIssue})};
+    var tg=li.querySelector('[data-a="toggle"]');
+    if(tg) tg.onclick=function(){opened[x.id]=!opened[x.id];render()};
+    if(np&&opened[x.id]) shelf(li.querySelector('.body'),x,touchIssue);
+    list.appendChild(li);
+  });
+}
+(function(){var s=$('iCat');CATS.forEach(function(c){
+  var o=document.createElement('option');o.value=c;o.textContent=c;s.appendChild(o)})})();
+function openIssue(x,preset){
+  editingIssue=x||null;issueQueue.length=0;renderQ('issueQueue',issueQueue);
+  $('issueFormTitle').textContent=x?'編輯異常紀錄':'新增異常紀錄';
+  $('issueDelete').style.display=x?'':'none';
+  var v=x||Object.assign({category:issueCat!=='全部'?issueCat:'CDU',title:'',body:'',unsolved:false},preset||{});
+  $('iCat').value=catOf(v);$('iTitle').value=v.title||'';$('iBody').value=v.body||'';
+  $('iOpen').checked=!!v.unsolved;
+  var np=(x?x.photos:(preset&&preset.photos))||[];
+  $('issuePhNote').textContent=np.length?(x?'已有 ':'會一併帶入 ')+np.length+' 張照片':'';
+  $('issueSheet').classList.add('on');
+}
+var issuePreset=null;
+function closeIssue(){$('issueSheet').classList.remove('on');editingIssue=null;issuePreset=null;issueQueue.length=0}
+/* 站點備忘 → 異常紀錄：帶入文字與照片（照片共用同一份檔案，不重複上傳） */
+function noteToIssue(n){
+  var first=(n.text||'').split('\n')[0].slice(0,40);
+  issuePreset={title:first,body:'【站點】'+n.site+'\n'+(n.text||''),photos:(n.photos||[]).slice()};
+  openIssue(null,issuePreset);
+}
+$('newIssueBtn').onclick=function(){issuePreset=null;openIssue(null)};
+$('issueCancel').onclick=closeIssue;
+$('issuePic').onclick=function(){pickPhotos({arr:issueQueue,box:'issueQueue'})};
+$('iTpl').onclick=function(e){e.preventDefault();
+  var t='【現象】\n\n【錯誤碼】\n\n【原因】\n\n【處理】\n';
+  var b=$('iBody');b.value=b.value.trim()?b.value.trim()+'\n\n'+t:t;b.focus()};
+$('issueSave').onclick=async function(){
+  var v={category:$('iCat').value,title:$('iTitle').value.trim(),body:$('iBody').value.trim(),
+    unsolved:$('iOpen').checked};
+  if(!v.title&&!v.body&&!issueQueue.length){toast('請至少填標題或內容');return}
+  if(!v.title) v.title=v.body.split('\n').filter(Boolean)[0]||'（照片）';
+  var x=editingIssue;
+  if(x){Object.assign(x,v)}
+  else{
+    x=Object.assign({id:uid(),deleted:false,created:Date.now(),created_by:me(),updated_by:me(),
+      photos:(issuePreset&&issuePreset.photos||[]).slice()},v);
+    issues.push(x);
+  }
+  await commitQueue(issueQueue,x);
+  var cat=x.category;closeIssue();
+  if(tab==='issues'&&issueCat!=='全部'&&issueCat!==cat) issueCat=cat;
+  touchIssue(x);toast('已存到「'+cat+'」');
+};
+$('issueDelete').onclick=async function(){
+  if(!editingIssue||!confirm('刪除這筆異常紀錄？'+(online()?'\n同事那邊也會消失。':'')))return;
+  var x=editingIssue;closeIssue();await softDelete('issues',issues,x,touchIssue);
+};
+async function touchIssue(x){
+  x.updated=Date.now();x.updated_by=me();x.dirty=true;
+  await putIssue(x);render();scheduleSync();
+}
+$('issueSearch').addEventListener('input',function(){issueQ=this.value.trim().toLowerCase();render()});
+
 /* ================= 站點備忘 ================= */
 function enterSite(name){
   curSite=name;view='site';filter='open';q='';$('search').value='';
   syncSeg();render();window.scrollTo(0,0);
 }
-function goHome(){view='home';curSite='';render();window.scrollTo(0,0)}
+function goHome(){view='home';curSite='';inlineEdit=false;render();window.scrollTo(0,0)}
+function goTab(t){view='home';curSite='';tab=t;inlineEdit=false;
+  [].forEach.call($('homeTabs').children,function(x){x.classList.toggle('on',x.dataset.tab===tab)});
+  window.scrollTo(0,0)}
 $('backBtn').onclick=goHome;
 [].forEach.call($('homeTabs').children,function(b){
-  b.onclick=function(){tab=b.dataset.tab;
-    [].forEach.call($('homeTabs').children,function(x){x.classList.toggle('on',x.dataset.tab===tab)});
-    render()}});
+  b.onclick=function(){goTab(b.dataset.tab);render()}});
 
 function siteNotes(){return liveNotes().filter(function(n){return n.site===curSite})}
 function stats(){
@@ -847,36 +1394,40 @@ function renderNotes(){
       (n.dirty&&online()?'<span class="pend">待同步</span>':'')+
       (n.due?'<span class="due'+(late?' late':soon?' soon':'')+'">'+dueLabel(n.due)+'</span>':'')+
       (np?'<button class="clip" data-a="toggle">📎 '+np+(opened[n.id]?' ▲':' ▼')+'</button>':'')+
-      '<span class="acts"><button data-a="photo">＋照片</button>'+
+      '<span class="acts"><button data-a="photo">＋照片</button><button data-a="issue">轉異常</button>'+
       '<button data-a="edit">編輯</button><button data-a="del">刪除</button></span></div></div>'+
       '<button class="star'+(n.star?' on':'')+'" aria-label="標記重要">★</button>';
     li.querySelector('.check').onclick=function(){n.done=!n.done;touchNote(n)};
     li.querySelector('.star').onclick=function(){n.star=!n.star;touchNote(n)};
     li.querySelector('[data-a="del"]').onclick=function(){removeNote(n)};
     li.querySelector('[data-a="edit"]').onclick=function(){startEdit(li,n)};
-    li.querySelector('[data-a="photo"]').onclick=function(){attachTo=n;$('filePic').click()};
+    li.querySelector('[data-a="photo"]').onclick=function(){pickPhotos({obj:n,touch:touchNote})};
+    li.querySelector('[data-a="issue"]').onclick=function(){noteToIssue(n)};
     var tg=li.querySelector('[data-a="toggle"]');
     if(tg) tg.onclick=function(){opened[n.id]=!opened[n.id];render()};
-    if(np&&opened[n.id]) shelf(li.querySelector('.body'),n);
+    if(np&&opened[n.id]) shelf(li.querySelector('.body'),n,touchNote);
     listEl.appendChild(li);
   });
 }
-async function shelf(body,n){
+/* 照片架：備忘、借出、異常紀錄共用。touch＝該筆資料的存檔函式 */
+async function shelf(body,n,touch){
   var box=document.createElement('div');box.className='shelf';body.appendChild(box);
-  for(var i=0;i<n.photos.length;i++){
+  var ids=(n.photos||[]).slice();
+  for(var i=0;i<ids.length;i++){
     var ph=document.createElement('div');ph.className='loading';ph.textContent='…';box.appendChild(ph);
-    var p=await ensurePhoto(n.photos[i]);
+    var p=await ensurePhoto(ids[i]);
     if(!p){ph.textContent='讀不到';continue}
     var im=document.createElement('img');
     im.src=objURL(p.id+':t',p.thumb);im.loading='lazy';im.alt='附件照片';
-    (function(pid){im.onclick=function(){viewPhoto(pid,n)}})(p.id);
-    box.replaceChild(im,ph);
+    (function(pid){im.onclick=function(){viewPhoto(pid,n,touch)}})(p.id);
+    if(ph.parentNode===box) box.replaceChild(im,ph);
   }
   var add=document.createElement('button');
   add.type='button';add.className='addph';add.textContent='＋ 加照片';
-  add.onclick=function(){attachTo=n;$('filePic').click()};
+  add.onclick=function(){pickPhotos({obj:n,touch:touch})};
   box.appendChild(add);
 }
+function pickPhotos(target){picTarget=target;$('filePic').click()}
 function startEdit(li,n){
   var body=li.querySelector('.body');body.innerHTML='';
   var ta=document.createElement('textarea');
@@ -890,10 +1441,12 @@ function startEdit(li,n){
   var no=document.createElement('button');no.textContent='取消';
   acts.appendChild(ok);acts.appendChild(no);row.appendChild(acts);
   body.appendChild(ta);body.appendChild(dt);body.appendChild(row);ta.focus();
-  ok.onclick=function(){var v=ta.value.trim();if(v)n.text=v;
+  inlineEdit=true;   // 編輯中暫停重繪，避免每 20 秒的背景同步把正在打的字洗掉
+  ok.onclick=function(){inlineEdit=false;var v=ta.value.trim();if(v)n.text=v;
     n.due=dt.value?new Date(dt.value).getTime():null;touchNote(n)};
-  no.onclick=render;
+  no.onclick=function(){inlineEdit=false;render()};
 }
+var inlineEdit=false;
 async function touchNote(n){
   n.updated=Date.now();n.updated_by=me();n.dirty=true;
   await putNote(n);render();scheduleSync();
@@ -902,9 +1455,9 @@ async function removeNote(n){
   if(!confirm('刪除這則備忘'+((n.photos||[]).length?'和它的 '+n.photos.length+' 張照片':'')+'？'))return;
   n.deleted=true;delete opened[n.id];
   if(!online()){
-    for(var i=0;i<(n.photos||[]).length;i++) await delPhoto(n.photos[i]);
     await delNoteDB(n.id);
     notes=notes.filter(function(x){return x.id!==n.id});
+    for(var i=0;i<(n.photos||[]).length;i++) if(!photoInUse(n.photos[i])) await delPhoto(n.photos[i]);
     render();return;
   }
   touchNote(n);
@@ -912,19 +1465,24 @@ async function removeNote(n){
 
 /* ================= 照片檢視 ================= */
 var viewing=null;
-async function viewPhoto(pid,n){
+async function viewPhoto(pid,n,touch){
   var p=await ensurePhoto(pid);if(!p)return;
-  viewing={p:p,n:n};$('viewerImg').src=objURL(p.id+':f',p.full);
+  viewing={p:p,n:n,touch:touch};$('viewerImg').src=objURL(p.id+':f',p.full);
   $('viewer').classList.add('on');
+}
+/* 同一張照片可能被「轉異常」複製到別筆資料，仍有人用就不能刪檔 */
+function photoInUse(pid,except){
+  return [notes,loans,issues].some(function(arr){return arr.some(function(x){
+    return x!==except&&(x.photos||[]).indexOf(pid)>=0})});
 }
 $('viewerClose').onclick=function(){$('viewer').classList.remove('on');viewing=null};
 $('viewerDel').onclick=async function(){
   if(!viewing||!confirm('刪除這張照片？'))return;
-  var n=viewing.n,pid=viewing.p.id;
+  var n=viewing.n,pid=viewing.p.id,touch=viewing.touch;
   n.photos=n.photos.filter(function(x){return x!==pid});
-  await delPhoto(pid);
+  if(!photoInUse(pid,n)){await delPhoto(pid);removeStoragePhoto(pid)}
   $('viewer').classList.remove('on');viewing=null;
-  touchNote(n);
+  touch(n);
 };
 
 /* ================= 到期日 ================= */
@@ -978,6 +1536,7 @@ function syncSeg(){[].forEach.call($('statusFilter').children,
 /* ================= 總渲染 ================= */
 function render(){
   stats();
+  if(inlineEdit&&view==='site'){checkBanner();return}
   var home=view==='home';
   $('viewHome').classList.toggle('hide',!home);
   $('viewSite').classList.toggle('hide',home);
@@ -987,7 +1546,12 @@ function render(){
   if(home){
     $('paneBoard').classList.toggle('hide',tab!=='board');
     $('paneSites').classList.toggle('hide',tab!=='sites');
-    if(tab==='board') renderBoard(); else renderSiteGrid();
+    $('paneLoans').classList.toggle('hide',tab!=='loans');
+    $('paneIssues').classList.toggle('hide',tab!=='issues');
+    if(tab==='board') renderBoard();
+    else if(tab==='loans') renderLoans();
+    else if(tab==='issues') renderIssues();
+    else renderSiteGrid();
   }else renderNotes();
   checkBanner();
 }
@@ -1004,6 +1568,15 @@ function checkBanner(){
       (names.length>2?' 等':'')+'）。';
     $('bannerBtn').textContent='去處理';
     $('bannerBtn').onclick=function(){enterSite(names[0]);filter='due';syncSeg();render()};
+    b.classList.add('on');return;
+  }
+  var ll=liveLoans().filter(loanLate);
+  if(ll.length){
+    $('bannerTag').textContent='未歸還';
+    $('bannerText').textContent='有 '+ll.length+' 筆借出已過歸還日（'+
+      ll.slice(0,2).map(function(l){return l.party||l.item}).join('、')+(ll.length>2?' 等':'')+'）。';
+    $('bannerBtn').textContent='查看';
+    $('bannerBtn').onclick=function(){goTab('loans');loanFilter='late';syncLoanSeg();render()};
     b.classList.add('on');return;
   }
   b.classList.remove('on');
@@ -1029,8 +1602,11 @@ $('cfgSave').onclick=async function(){
       notes[i].dirty=true;await putNote(notes[i]);
     }
     for(var k=0;k<ships.length;k++){ships[k].dirty=true;await putShipDB(ships[k])}
-    for(var j=0;j<sites.length;j++) pushSite(sites[j]);
-    sync();
+    for(var a=0;a<loans.length;a++){loans[a].dirty=true;await putLoan(loans[a])}
+    for(var b=0;b<issues.length;b++){issues[b].dirty=true;await putIssue(issues[b])}
+    for(var j=0;j<sites.length;j++) if(pendingSites.indexOf(sites[j])<0) pendingSites.push(sites[j]);
+    await putMeta('pendingSites',pendingSites);
+    startAuto();sync();
   }else{setSync('off','尚未設定共用（資料只存在本機）');render()}
   storageInfo();
 };
@@ -1082,7 +1658,8 @@ $('exportBtn').onclick=async function(){
     try{photos.push({id:ps[i].id,full:await blobToDataURL(ps[i].full),thumb:await blobToDataURL(ps[i].thumb)})}
     catch(e){skipped++}
   }
-  var data={version:5,exported:Date.now(),sites:sites,notes:notes,ships:ships,photos:photos};
+  var data={version:6,exported:Date.now(),sites:sites,notes:notes,ships:ships,
+    loans:loans,issues:issues,photos:photos};
   var blob=new Blob([JSON.stringify(data)],{type:'application/json'});
   var a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='workmemo-'+new Date().toISOString().slice(0,10)+'.json';a.click();
@@ -1102,6 +1679,8 @@ $('fileJson').onchange=function(){
       if(!confirm('用備份覆蓋本機所有資料？'))return;
       var ns=await allNotes();for(var i=0;i<ns.length;i++) await delNoteDB(ns[i].id);
       var ss=await allShipsDB();for(var x=0;x<ss.length;x++) await delShipDB(ss[x].id);
+      var ls=await dbAll('loans');for(var x2=0;x2<ls.length;x2++) await dbDel('loans',ls[x2].id);
+      var is=await dbAll('issues');for(var x3=0;x3<is.length;x3++) await dbDel('issues',is[x3].id);
       var ps=await allPhotos();for(var j=0;j<ps.length;j++) await delPhoto(ps[j].id);
       for(var k=0;k<(d.photos||[]).length;k++){
         var p=d.photos[k];
@@ -1115,6 +1694,10 @@ $('fileJson').onchange=function(){
       for(var m=0;m<notes.length;m++) await putNote(notes[m]);
       ships=(d.ships||[]).map(function(s){s.dirty=online();return s});
       for(var y=0;y<ships.length;y++) await putShipDB(ships[y]);
+      loans=(d.loans||[]).map(function(s){s.dirty=online();return s});
+      for(var y2=0;y2<loans.length;y2++) await putLoan(loans[y2]);
+      issues=(d.issues||[]).map(function(s){s.dirty=online();return s});
+      for(var y3=0;y3<issues.length;y3++) await putIssue(issues[y3]);
       sites=(d.sites&&d.sites.length)?d.sites:DEFAULT_SITES.slice();
       await putMeta('sites',sites);
       urls={};opened={};render();storageInfo();
@@ -1131,18 +1714,23 @@ $('input').addEventListener('input',function(){this.style.height='auto';this.sty
 $('input').addEventListener('keydown',function(e){
   if(HAS_KB&&e.key==='Enter'&&!e.shiftKey){e.preventDefault();add()}});
 $('addBtn').onclick=add;
-$('picBtn').onclick=function(){attachTo=null;$('filePic').click()};
+$('picBtn').onclick=function(){pickPhotos(null)};
 $('filePic').onchange=async function(){
   var fs=Array.prototype.slice.call(this.files);this.value='';
+  var t=picTarget;picTarget=null;
   if(!fs.length)return;
-  if(attachTo){
-    var n=attachTo;attachTo=null;
-    var before=queue.length;await intake(fs);
-    var added=queue.splice(before);
+  var added=await intake(fs);
+  if(!added.length) return;
+  if(t&&t.obj){                         // 直接附加到既有資料
+    var n=t.obj;
     for(var i=0;i<added.length;i++){await putPhoto(added[i]);n.photos=(n.photos||[]).concat(added[i].id)}
-    opened[n.id]=true;renderQueue();toast('已附加 '+added.length+' 張照片');
-    touchNote(n);
-  }else{await intake(fs);toast('照片已加入，按「建立」存檔')}
+    opened[n.id]=true;toast('已附加 '+added.length+' 張照片');
+    t.touch(n);
+  }else if(t&&t.arr){                   // 表單暫存，按儲存才寫入
+    Array.prototype.push.apply(t.arr,added);renderQ(t.box,t.arr);
+  }else{
+    Array.prototype.push.apply(queue,added);renderQueue();toast('照片已加入，按「建立」存檔');
+  }
 };
 $('addSiteBtn').onclick=async function(){
   var name=prompt('新增站點名稱');if(!name)return;name=name.trim();if(!name)return;
@@ -1163,9 +1751,7 @@ $('copyBtn').onclick=function(){
     (n.due?'（'+dueLabel(n.due).slice(2)+'）':'')+
     (n.created_by?'（'+n.created_by+'）':'')+
     ((n.photos||[]).length?'（附 '+n.photos.length+' 張照片）':'')}).join('\n');
-  if(navigator.share){navigator.share({text:txt}).catch(function(){});return}
-  navigator.clipboard.writeText(txt).then(function(){toast('已複製')},
-    function(){prompt('手動複製：',txt)});
+  share(txt);
 };
 $('clearBtn').onclick=async function(){
   var done=siteNotes().filter(function(n){return n.done});
@@ -1176,25 +1762,34 @@ $('clearBtn').onclick=async function(){
       done[i].deleted=true;done[i].updated=Date.now();done[i].updated_by=me();done[i].dirty=true;
       await putNote(done[i]);
     }else{
-      for(var j=0;j<(done[i].photos||[]).length;j++) await delPhoto(done[i].photos[j]);
       await delNoteDB(done[i].id);
       var gone=done[i].id;
       notes=notes.filter(function(n){return n.id!==gone});
+      for(var j=0;j<(done[i].photos||[]).length;j++) if(!photoInUse(done[i].photos[j])) await delPhoto(done[i].photos[j]);
     }
   }
   render();scheduleSync();
 };
 
 /* ================= 啟動 ================= */
+/* 自動同步只啟動一次；開機時沒設定、之後才在設定頁填好也會啟動 */
+function startAuto(){
+  if(autoOn) return; autoOn=true;
+  setInterval(function(){if(online())sync(true)},20000);
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'&&online()) sync(true)});
+  window.addEventListener('online',function(){if(online())sync(true)});
+}
 (async function boot(){
   try{await openDB()}
   catch(e){$('shipEmpty').textContent='這台裝置不允許本機資料庫，請關閉無痕模式再試。';return}
   notes=await allNotes();
   ships=await allShipsDB();
+  loans=await dbAll('loans');
+  issues=await dbAll('issues');
   var s=await getMeta('sites');if(s&&s.length)sites=s;
-  var pm=await getMeta('pullMark');if(pm)pullMark=Object.assign(pullMark,pm);
-  var oldMark=await getMeta('lastPull');
-  if(oldMark&&pullMark.notes==='1970-01-01T00:00:00Z') pullMark.notes=oldMark;
+  pendingSites=(await getMeta('pendingSites'))||[];
+  var pm=await getMeta('pullMark2');if(pm)pullMark=Object.assign(pullMark,pm);
   cfg=(await getMeta('cfg'))||cfg;
 
   var m=/#cfg=([^&]+)/.exec(location.hash||'');
@@ -1210,11 +1805,7 @@ $('clearBtn').onclick=async function(){
   syncDueBtn();render();storageInfo();
   if(online()){
     if(!cfg.user){openSheet();toast('請先輸入你的名字')}
-    sync(true);
-    setInterval(function(){sync(true)},20000);
-    document.addEventListener('visibilitychange',function(){
-      if(document.visibilityState==='visible') sync(true)});
-    window.addEventListener('online',function(){sync(true)});
+    startAuto();sync(true);
   }else setSync('off','尚未設定共用（資料只存在本機）');
   setInterval(function(){stats();checkBanner()},60000);
   if('serviceWorker' in navigator&&location.protocol!=='file:')
