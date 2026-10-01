@@ -1,5 +1,5 @@
 // 網路優先：每次開啟先抓最新版，抓不到才用快取（離線仍可用）
-const CACHE = 'workmemo-v6';
+const CACHE = 'workmemo-v7';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
